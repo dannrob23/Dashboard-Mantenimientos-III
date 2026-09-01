@@ -396,9 +396,14 @@ function calcularTodo(){
     a.avance_pct=a.total?Math.round(a.intervenidas/a.total*1000)/10:0;
     return a; }).sort((x,y)=>y.total-x.total);
 
+  const enProceso = cuenta('En Proceso');
+  const programadas = cuenta('Programada');
+  const intervenidas = ejecutadas + enProceso;
+
   const kpis = {
     total: rows.length, ejecutadas, pendientes,
-    avance: rows.length?ejecutadas/rows.length:0,
+    en_proceso: enProceso, programadas, intervenidas,
+    avance: rows.length ? intervenidas / rows.length : 0,
     evaluables:evR, cumplen:cumplenR, desvian:desvR,
     cumplimiento:evR?cumplenR/evR:0, desviacion:evR?desvR/evR:0,
     desv_prom:diasNo.length?+(diasNo.reduce((a,b)=>a+b,0)/diasNo.length).toFixed(2):0,
@@ -476,11 +481,44 @@ function renderKpis(){
   const alertClass = isDanger ? 'danger' : 'safe';
   const alertIcon = isDanger ? '⚠️' : '✅';
 
+  const totalNacional = DATOS.rows.length;
+  const intervNacionalPct = totalNacional ? (k.intervenidas / totalNacional * 100).toFixed(1) : 0;
+  const intervMesPct = totalSedes ? (k.en_proceso / totalSedes * 100).toFixed(1) : 0;
+
   document.getElementById('kpis').innerHTML = `
     <div class="hero">
+      <!-- 1. Contador Real de Sedes Intervenidas Día a Día -->
       <div class="kpi-card">
         <div class="kpi-header">
-          <div><div class="kpi-tit">🎯 Tasa de cumplimiento</div><div class="kpi-sub">SÍ / Evaluables · meta 95%</div></div>
+          <div><div class="kpi-tit">📍 Sedes Intervenidas (Acumulado)</div><div class="kpi-sub">Iniciadas en campo / Total plan maestro</div></div>
+          <div class="kpi-val navy">${fmt.format(k.intervenidas)} <small style="font-size:15px; font-weight:600; color:var(--muted);">/ ${fmt.format(totalNacional)}</small></div>
+        </div>
+        <div class="kpi-bar-bg">
+          <div class="kpi-bar-fill navy" style="width: 0%" data-width="${Math.min(intervNacionalPct, 100)}%"></div>
+        </div>
+        <div class="kpi-sub" style="margin-top:6px; font-weight:600; color:var(--navy);">
+          ${intervNacionalPct}% del total nacional · <b>${k.en_proceso} activas en sitio hoy</b>
+        </div>
+      </div>
+
+      <!-- 2. Programadas vs En Proceso en el Mes -->
+      <div class="kpi-card">
+        <div class="kpi-header">
+          <div><div class="kpi-tit">📊 Programadas vs En Proceso</div><div class="kpi-sub">Sedes activas hoy vs Meta del mes</div></div>
+          <div class="kpi-val amber">${fmt.format(k.en_proceso)} <small style="font-size:15px; font-weight:600; color:var(--muted);">/ ${fmt.format(totalSedes)}</small></div>
+        </div>
+        <div class="kpi-bar-bg">
+          <div class="kpi-bar-fill amber" style="width: 0%" data-width="${Math.min(intervMesPct, 100)}%"></div>
+        </div>
+        <div class="kpi-sub" style="margin-top:6px; font-weight:600; color:var(--navy);">
+          <b>${k.en_proceso} en sitio</b> · ${progSolo} programadas por iniciar
+        </div>
+      </div>
+
+      <!-- 3. Tasa de Cumplimiento -->
+      <div class="kpi-card">
+        <div class="kpi-header">
+          <div><div class="kpi-tit">🎯 Tasa de cumplimiento</div><div class="kpi-sub">SÍ / Evaluables (Cerradas) · meta 95%</div></div>
           <div class="kpi-val ${cump_color}">${cump_pct}%</div>
         </div>
         <div class="kpi-bar-bg">
@@ -489,6 +527,7 @@ function renderKpis(){
         </div>
       </div>
 
+      <!-- 4. Desviación Cronograma -->
       <div class="kpi-card">
         <div class="kpi-header">
           <div><div class="kpi-tit">⏱️ Desviación cronograma</div><div class="kpi-sub">(NO + Repro.) / Evaluables · tope 10%</div></div>
@@ -498,24 +537,6 @@ function renderKpis(){
           <div class="kpi-bar-fill ${desv_color}" style="width: 0%" data-width="${Math.min(desv_pct, 100)}%"></div>
           <div class="kpi-target-line" style="left: 10%" title="Tope: 10%"></div>
         </div>
-      </div>
-
-      <div class="kpi-card kpi-center">
-        <div class="kpi-tit">🎯 Eficiencia Auditoría</div>
-        <div class="radial-wrap">
-          <svg class="radial-svg" viewBox="0 0 80 80">
-            <circle class="radial-bg" cx="40" cy="40" r="32"></circle>
-            <circle class="radial-fill" cx="40" cy="40" r="32" style="stroke-dashoffset: 201" data-offset="${ringOffset}"></circle>
-          </svg>
-          <div class="radial-text">${pct(k.eficiencia_calidad || 0)}</div>
-        </div>
-        <div class="kpi-sub">Sedes cerradas / Ejecutadas</div>
-      </div>
-
-      <div class="alert-card ${alertClass}">
-        <div class="alert-title"><span class="alert-icon">${alertIcon}</span> Cuellos de botella</div>
-        <div class="alert-val">${fmt.format(k.cuellos_botella)}</div>
-        <div class="alert-desc">${fmt.format(k.actas_pendientes)} actas pendientes de firma<br>${fmt.format(k.en_proceso_largo)} en proceso &gt;48h</div>
       </div>
     </div>
 
