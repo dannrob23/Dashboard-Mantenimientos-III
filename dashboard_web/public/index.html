@@ -839,7 +839,10 @@ async function init(){
     return;
   }
 
-  llenarSelect('f_mes', DATOS.plan_mensual, m=>`${String(m.mes).padStart(2,'0')}/${m.ano}`, m=>`${m.ano}-${m.mes}`);
+  const NOMBRES_MES = {1:'ENE',2:'FEB',3:'MAR',4:'ABR',5:'MAY',6:'JUN',7:'JUL',8:'AGO',9:'SEP',10:'OCT',11:'NOV',12:'DIC'};
+  const fmtEtiquetaMes = m => `${NOMBRES_MES[m.mes]||String(m.mes).padStart(2,'0')}/01/${m.ano}`;
+
+  llenarSelect('f_mes', DATOS.plan_mensual, fmtEtiquetaMes, m=>`${m.ano}-${m.mes}`);
   llenarSelect('f_region', DATOS.regiones, r=>r.region, r=>r.region);
   llenarSelect('f_aliado', DATOS.aliados, a=>a.aliado, a=>a.aliado);
   llenarSelect('f_estado', DATOS.estados, e=>e.estado, e=>e.estado);
