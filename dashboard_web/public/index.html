@@ -160,19 +160,22 @@ function cargarPlotlyCDN(){
     .filtros { top: 0; padding: 12px; border-radius: 0; margin: -12px -16px 16px; border-left: none; border-right: none; border-top: none; }
     .grid { grid-template-columns: 1fr; gap: 12px; }
     .panel .chart { height: 260px; }
-    #mapa { height: 400px; }
+    #mapa { height: 360px; border-radius: 12px; }
     .panel { padding: 16px; }
-    .progress { gap: 12px; }
     
-    /* Responsive Table to Card List */
-    .tabla-scroll { border: none; background: transparent; overflow-y: visible; max-height: none; }
-    table, thead, tbody, th, td, tr { display: block; }
-    thead tr { display: none; }
-    tr { background: #fff; box-shadow: var(--shadow-sm); border-radius: 12px; margin-bottom: 12px; border: 1px solid var(--border); padding: 4px 0; }
-    tr:hover td { background: transparent; }
-    td { border-bottom: 1px solid var(--light); display: flex; justify-content: space-between; align-items: center; padding: 8px 14px; text-align: right; }
-    td:last-child { border-bottom: none; }
-    td::before { content: attr(data-label); font-weight: 600; color: var(--muted); font-size: 11px; text-transform: uppercase; text-align: left; margin-right: 12px; }
+    /* Scroll Horizontal Nativo para Tabla Departamentos en Móvil con Columna Fija */
+    .tabla-scroll { overflow-x: auto; -webkit-overflow-scrolling: touch; border-radius: 12px; border: 1px solid var(--border); }
+    #tabla_depto { width: 100%; min-width: 720px; border-collapse: collapse; font-size: 12px; }
+    #tabla_depto th:first-child, #tabla_depto td:first-child { position: sticky; left: 0; background: #fff; z-index: 5; box-shadow: 2px 0 5px rgba(0,0,0,0.05); }
+    #tabla_depto th:first-child { background: #F8FAFC; z-index: 15; }
+    
+    /* Directorio de Oficinas: vista en Tarjetas para Móvil */
+    #tabla_oficinas, #tabla_oficinas thead, #tabla_oficinas tbody, #tabla_oficinas th, #tabla_oficinas td, #tabla_oficinas tr { display: block; }
+    #tabla_oficinas thead tr { display: none; }
+    #tabla_oficinas tr { background: #fff; box-shadow: var(--shadow-sm); border-radius: 12px; margin-bottom: 12px; border: 1px solid var(--border); padding: 4px 0; }
+    #tabla_oficinas td { border-bottom: 1px solid var(--light); display: flex; justify-content: space-between; align-items: center; padding: 8px 14px; text-align: right; }
+    #tabla_oficinas td:last-child { border-bottom: none; }
+    #tabla_oficinas td::before { content: attr(data-label); font-weight: 600; color: var(--muted); font-size: 11px; text-transform: uppercase; text-align: left; margin-right: 12px; }
     .num { text-align: right; }
   }
 </style>
@@ -763,6 +766,7 @@ function renderMapa(){
   const ind = document.getElementById('sel_ind').value;
   const modo = document.getElementById('mapa_modo');
   const geo = D.geo.filter(g => deptoPorRegion(g, F.region));
+  const isMobile = window.innerWidth < 900;
 
   const texto = g => `<b>${g.depto}</b><br>Total Sedes: ${fmt.format(g.total)}<br>En Sitio (En proceso): ${fmt.format(g.en_proceso||0)}<br>Programadas: ${fmt.format(g.programadas||(g.total-(g.en_proceso||0)))}${g.horario?'<br>Horario: '+g.horario:''}`;
 
@@ -780,44 +784,46 @@ function renderMapa(){
     });
     const maxVal = Math.max(...z, 1);
     const colorEscala = ind==='avance_pct'
-      ? [[0,'#E2E8F0'],[0.25,'#93C5FD'],[0.6,'#3B82F6'],[1,'#16A34A']]
-      : [[0,'#E2E8F0'],[1,'#3B82F6']];
+      ? [[0,'#1E293B'],[0.25,'#0284C7'],[0.6,'#3B82F6'],[1,'#10B981']]
+      : [[0,'#1E293B'],[1,'#3B82F6']];
     plot('mapa', [{
       type:'choropleth', geojson:GEOJSON, locations, z, featureidkey:'properties.'+geoKey,
       colorscale:colorEscala, zmin:0, zmax:maxVal,
-      marker:{line:{color:'#fff', width:.8}},
+      marker:{line:{color:'#334155', width:.8}},
       hovertemplate:'%{customdata[1]}<extra></extra>', customdata:custom,
-      colorbar:{title:{text: ind==='avance_pct'?'% avance':'cantidad', side:'right'}}
-    }], {height: window.innerWidth < 900 ? 420 : 540,
-         margin:{l:10,r:10,t:10,b:10},
-         geo:{scope:'south america', center:{lon:-73.5, lat:4.5}, projection:{type:'mercator', scale:4.2},
-              lonaxis:{range:[-80,-66]}, lataxis:{range:[-4,13]}, showframe:false, bgcolor:'#FFFFFF',
-              showland:true, landcolor:'#F8FAFC', countrycolor:'#CBD5E1', countrywidth:1,
-              showcoastlines:true, coastlinecolor:'#CBD5E1'}});
+      colorbar:{title:{text: ind==='avance_pct'?'% avance':'cantidad', side:'right'}, tickfont:{color:'#fff'}}
+    }], {height: isMobile ? 360 : 540,
+         margin:{l:5,r:5,t:5,b:5},
+         dragmode: isMobile ? false : 'zoom',
+         geo:{scope:'south america', center:{lon:-73.5, lat:isMobile ? 4.2 : 4.5}, projection:{type:'mercator', scale: isMobile ? 5.2 : 4.2},
+              lonaxis:{range:[-81,-66]}, lataxis:{range:[-4,13]}, showframe:false, bgcolor:'#0F172A',
+              showland:true, landcolor:'#1E293B', countrycolor:'#334155', countrywidth:1,
+              showcoastlines:true, coastlinecolor:'#334155'}});
     modo.textContent = 'Modo: choropleth (colombia.geojson)';
   } else {
     const validGeo = geo.filter(g => g.lat !== null && g.lon !== null);
     const lon = validGeo.map(g => g.lon), lat = validGeo.map(g => g.lat);
     const colores = validGeo.map(g => {
-      if ((g.finalizadas||0) + (g.sede_cerrada||0) > 0) return '#16A34A';
-      if ((g.en_proceso||0) > 0) return '#3B82F6';
-      return '#64748B';
+      if ((g.finalizadas||0) + (g.sede_cerrada||0) > 0) return '#10B981'; // Verde Esmeralda
+      if ((g.en_proceso||0) > 0) return '#00F0FF'; // Cían Eléctrico Neón
+      return '#64748B'; // Slate Gray
     });
-    const tam = validGeo.map(g => Math.max(10, Math.sqrt(g.total) * 4.2));
+    const tam = validGeo.map(g => Math.max(isMobile ? 12 : 10, Math.sqrt(g.total) * (isMobile ? 4.8 : 4.2)));
     const custom = validGeo.map(g => [g.depto, texto(g)]);
     plot('mapa', [{
       type:'scattergeo', lon, lat, mode:'markers+text',
-      text: validGeo.map(g => g.depto), textposition:'top center',
-      textfont: {size:10, color:COLORES.navy, family:'Inter, sans-serif'},
+      text: validGeo.map(g => g.depto), textposition: isMobile ? 'top center' : 'top center',
+      textfont: {size: isMobile ? 9 : 10, color: '#F8FAFC', family:'Inter, sans-serif'},
       customdata: custom, hovertemplate:'%{customdata[1]}<extra></extra>',
-      marker: {size:tam, color:colores, line:{color:'#ffffff', width:1.5}, opacity:0.9}
-    }], {height: window.innerWidth < 900 ? 420 : 540,
-         margin:{l:10,r:10,t:10,b:10},
-         geo:{scope:'south america', center:{lon:-73.5, lat:4.5}, projection:{type:'mercator', scale:4.0},
+      marker: {size:tam, color:colores, line:{color:'#0F172A', width:1.5}, opacity:0.95}
+    }], {height: isMobile ? 360 : 540,
+         margin:{l:5,r:5,t:5,b:5},
+         dragmode: isMobile ? false : 'zoom',
+         geo:{scope:'south america', center:{lon:-73.5, lat: isMobile ? 4.0 : 4.5}, projection:{type:'mercator', scale: isMobile ? 5.2 : 4.0},
               lonaxis:{range:[-81,-66]}, lataxis:{range:[-4,13]},
-              showland:true, landcolor:'#F8FAFC', countrycolor:'#CBD5E1', countrywidth:1,
-              showcoastlines:true, coastlinecolor:'#CBD5E1', showframe:false, bgcolor:'#FFFFFF'}});
-    modo.textContent = `📍 Cobertura Nacional: ${validGeo.length} departamentos · ${D.rows.length} sedes programadas en mapa`;
+              showland:true, landcolor:'#1E293B', countrycolor:'#334155', countrywidth:1,
+              showcoastlines:true, coastlinecolor:'#334155', showframe:false, bgcolor:'#0F172A'}});
+    modo.textContent = `📍 Cobertura Nacional: ${validGeo.length} departamentos · ${D.rows.length} sedes programadas`;
   }
 }
 
