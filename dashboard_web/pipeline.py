@@ -20,13 +20,9 @@ import unicodedata
 from openpyxl import load_workbook
 
 AQUI = os.path.dirname(os.path.abspath(__file__))
-# Búsqueda por defecto de la bitácora en orden de prioridad
-CANDIDATOS_XLSX = [
-    os.path.abspath(os.path.join(AQUI, "..", "CONTROL DE EQUIPOS MANTENIMIENTO.xlsx")),
-    os.path.abspath(os.path.join(AQUI, "..", "Bitacora_Final_Dashboard_BAC.xlsx")),
-    os.path.join(AQUI, "data", "Bitacora_Diaria.xlsx")
-]
-XLSX_DEFECTO = next((path for path in CANDIDATOS_XLSX if os.path.exists(path)), CANDIDATOS_XLSX[-1])
+# Búsqueda estricta de la bitácora oficial
+OFFICIAL_XLSX = os.path.abspath(os.path.join(AQUI, "..", "CONTROL DE EQUIPOS MANTENIMIENTO.xlsx"))
+XLSX_DEFECTO = OFFICIAL_XLSX if os.path.exists(OFFICIAL_XLSX) else os.path.join(AQUI, "data", "Bitacora_Diaria.xlsx")
 SALIDA = os.path.join(AQUI, "public", "dashboard.json")
 
 REGIONES = ["ANTIOQUIA", "ORIENTE", "COSTA", "SUR", "OCCIDENTE", "SANTANDERES",
@@ -66,12 +62,9 @@ def normalizar(nombre):
 def a_fecha(v):
     if not v:
         return None
-    if isinstance(v, datetime.datetime):
-        return v.date()
-    if isinstance(v, datetime.date):
-        return v
-    s = str(v).strip()
-    s = re.sub(r"\s+.*$", "", s) # quitar hora si existe
+    if isinstance(v, (datetime.datetime, datetime.date)):
+        return v.date() if isinstance(v, datetime.datetime) else v
+    s = re.sub(r"\s+.*$", "", str(v).strip())
     m = re.match(r"^(\d{4})[-/](\d{1,2})[-/](\d{1,2})", s)
     if m:
         try:
@@ -168,28 +161,36 @@ def leer_registros(xlsx, maestro):
         wb.close()
         return []
 
-    def find_idx(*names):
-        for name in names:
-            norm_name = normalizar(name)
+    def find_idx(exact_names, contains_names=None, exclude_words=None):
+        for name in exact_names:
+            norm = normalizar(name)
             for idx, h in enumerate(headers):
-                if norm_name in h or h == norm_name:
+                if h == norm:
                     return idx
+        if contains_names:
+            for name in contains_names:
+                norm = normalizar(name)
+                for idx, h in enumerate(headers):
+                    if norm in h:
+                        if exclude_words and any(normalizar(ex) in h for ex in exclude_words):
+                            continue
+                        return idx
         return None
 
-    idx_sban = find_idx("SBAN")
-    idx_oficina = find_idx("Nombre_Oficina", "Nombre Oficina", "Oficina")
-    idx_muni = find_idx("Municipio", "MJNICIPIO")
-    idx_depto = find_idx("Departamento")
-    idx_region = find_idx("Jefaturas Operaciones Regional", "Region", "Regional")
-    idx_f_prog_ini = find_idx("Fecha_Programada_Inicio", "Fecha Programada Inicio", "FECHA INICIO CRONOGRAMANA", "Fecha Inicio")
-    idx_f_prog_fin = find_idx("Fecha_Programada_Fin", "Fecha Programada Fin", "FECHA FIN CRONOGRMA", "Fecha Fin")
-    idx_f_ini_real = find_idx("Fecha_Inicio_Real", "Fecha Inicio Real", "FECHA DE INICIO")
-    idx_f_salida = find_idx("Fecha_Salida_Real", "Fecha Salida Real", "Fecha Cierre Operativo", "FECHA FIN")
-    idx_dias = find_idx("Dias_Desviacion", "Dias Desviacion")
-    idx_estado_colsof = find_idx("ESTADO COLSOF", "Estado_Mantenimiento", "Estado Mantenimiento", "Estado")
-    idx_estado_bac = find_idx("ESTADO BAC", "REVISION BAC", "Estatus_Acta", "Estatus Acta")
-    idx_causal = find_idx("Causal_Desviacion", "Causal Desviacion", "Causal", "OBSERVACION", "OBSERVACIONES")
-    idx_cant = find_idx("Cantidad_Equipos", "Cantidad Equipos")
+    idx_sban = find_idx(["SBAN"])
+    idx_oficina = find_idx(["Nombre_Oficina", "Nombre Oficina", "Oficina"])
+    idx_muni = find_idx(["Municipio", "MJNICIPIO"])
+    idx_depto = find_idx(["Departamento"])
+    idx_region = find_idx(["Jefaturas Operaciones Regional", "Region", "Regional"])
+    idx_f_prog_ini = find_idx(["FECHA INICIO CRONOGRAMANA", "Fecha_Programada_Inicio", "Fecha Programada Inicio", "Fecha Inicio"])
+    idx_f_prog_fin = find_idx(["FECHA FIN CRONOGRMA", "Fecha_Programada_Fin", "Fecha Programada Fin"], contains_names=["CRONOGRMA", "CRONOGRAMA"])
+    idx_f_ini_real = find_idx(["FECHA DE INICIO", "Fecha_Inicio_Real", "Fecha Inicio Real"])
+    idx_f_salida = find_idx(["FECHA FIN", "Fecha_Salida_Real", "Fecha Salida Real", "Fecha Cierre Operativo"], contains_names=["FECHA FIN"], exclude_words=["CRONOGRAMA", "CRONOGRMA"])
+    idx_dias = find_idx(["Dias_Desviacion", "Dias Desviacion"])
+    idx_estado_colsof = find_idx(["ESTADO COLSOF", "Estado_Mantenimiento", "Estado Mantenimiento", "Estado"])
+    idx_estado_bac = find_idx(["ESTADO BAC", "REVISION BAC", "Estatus_Acta", "Estatus Acta"])
+    idx_causal = find_idx(["Causal_Desviacion", "Causal Desviacion", "Causal", "OBSERVACION", "OBSERVACIONES"])
+    idx_cant = find_idx(["Cantidad_Equipos", "Cantidad Equipos"])
 
     registros = []
     for fila in rows:
@@ -211,8 +212,8 @@ def leer_registros(xlsx, maestro):
         st_colsof_raw = str(get_val(idx_estado_colsof) or "").strip()
         st_bac_raw = str(get_val(idx_estado_bac) or "").strip()
 
-        # Determinar estado unificado
-        if st_bac_raw in ("OK", "REVISADO", "Sede_Cerrada", "Firmada"):
+        # Determinar estado unificado basado en los campos reales de la bitácora técnica
+        if st_bac_raw in ("OK", "REVISADO", "Sede_Cerrada", "Firmada") and k:
             estado = "Sede_Cerrada"
         elif k or st_colsof_raw in ("FINALIZADA", "Finalizada", "CONCLUIDO"):
             estado = "Finalizada"
@@ -275,13 +276,15 @@ def leer_registros(xlsx, maestro):
 
 
 def mes_por_defecto(regs):
-    fechas = [r["f_cierre"] for r in regs if r["f_cierre"]]
-    if not fechas:
-        fechas = [r["f_prog_fin"] for r in regs if r["f_prog_fin"]]
-    if not fechas:
-        return datetime.date.today().month, datetime.date.today().year
-    f = max(fechas)
-    return f.month, f.year
+    fechas_reales = [r["f_ini_real"] for r in regs if r["f_ini_real"]] + [r["f_cierre"] for r in regs if r["f_cierre"]]
+    if fechas_reales:
+        f = max(fechas_reales)
+        return f.month, f.year
+    fechas_prog = [r["f_prog_ini"] for r in regs if r["f_prog_ini"]]
+    if fechas_prog:
+        f = min(fechas_prog)
+        return f.month, f.year
+    return datetime.date.today().month, datetime.date.today().year
 
 
 def main():
