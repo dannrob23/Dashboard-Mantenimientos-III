@@ -386,17 +386,26 @@ def main():
     aliados = [{"aliado": a, "total": n} for a, n in
                sorted(por_aliado.items(), key=lambda x: -x[1])]
 
-    # ---- plan mensual (sep-dic)
+    # ---- plan mensual (filtrado solo a meses activos/iniciados para evitar mostrar meses futuros sin ejecutar)
     meses = {}
+    meses_activos = set([(mes, ano)])
+    for r in regs:
+        if r["f_ini_real"]:
+            meses_activos.add((r["f_ini_real"].month, r["f_ini_real"].year))
+        if r["f_cierre"]:
+            meses_activos.add((r["f_cierre"].month, r["f_cierre"].year))
+
     for r in regs:
         if r["f_prog_ini"]:
             cl = (r["f_prog_ini"].month, r["f_prog_ini"].year)
-            m = meses.setdefault(cl, {"mes": cl[0], "ano": cl[1], "programadas": 0, "ejecutadas": 0})
-            m["programadas"] += 1
+            if cl in meses_activos:
+                m = meses.setdefault(cl, {"mes": cl[0], "ano": cl[1], "programadas": 0, "ejecutadas": 0})
+                m["programadas"] += 1
         if r["f_cierre"]:
             cl = (r["f_cierre"].month, r["f_cierre"].year)
-            m = meses.setdefault(cl, {"mes": cl[0], "ano": cl[1], "programadas": 0, "ejecutadas": 0})
-            m["ejecutadas"] += 1
+            if cl in meses_activos:
+                m = meses.setdefault(cl, {"mes": cl[0], "ano": cl[1], "programadas": 0, "ejecutadas": 0})
+                m["ejecutadas"] += 1
     plan_mensual = sorted(meses.values(), key=lambda x: (x["ano"], x["mes"]))
 
     # ---- geo por departamento

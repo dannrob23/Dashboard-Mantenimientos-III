@@ -5,7 +5,7 @@
   "ano": 2026,
   "total_registros": 824,
   "sin_departamento": 0,
-  "generado": "2026-09-01T10:49:46"
+  "generado": "2026-09-01T10:51:40"
  },
  "kpis": {
   "total": 824,
@@ -197,24 +197,6 @@
    "mes": 9,
    "ano": 2026,
    "programadas": 511,
-   "ejecutadas": 0
-  },
-  {
-   "mes": 10,
-   "ano": 2026,
-   "programadas": 261,
-   "ejecutadas": 0
-  },
-  {
-   "mes": 11,
-   "ano": 2026,
-   "programadas": 51,
-   "ejecutadas": 0
-  },
-  {
-   "mes": 12,
-   "ano": 2026,
-   "programadas": 1,
    "ejecutadas": 0
   }
  ],
@@ -1056,7 +1038,7 @@
    ],
    "lat": 2.2,
    "lon": -72.0,
-   "horario": "8:00 AM - 11:30 AM Y DE 02:00 PM - 04:30 PM",
+   "horario": "8:00 A.M.  A 3:00 P.M.",
    "aliados": [
     "GESTIONATECH"
    ],
