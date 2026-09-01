@@ -1,0 +1,37 @@
+name: Actualizar Dashboard BAC
+
+on:
+  push:
+    paths:
+      - 'Bitacora_Final_Dashboard_BAC.xlsx'
+      - 'dashboard_web/pipeline.py'
+  schedule:
+    - cron: '0 11 * * *' # Ejecuta diariamente a las 06:00 AM Colombia (11:00 UTC)
+  workflow_dispatch:
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Repositorio
+        uses: actions/checkout@v4
+
+      - name: Configurar Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+          cache: 'pip'
+
+      - name: Instalar Dependencias
+        run: pip install pandas openpyxl
+
+      - name: Ejecutar Pipeline ETL
+        run: python dashboard_web/pipeline.py
+
+      - name: Commit y Push de Datos Actualizados
+        run: |
+          git config --local user.email "github-actions[bot]@users.noreply.github.com"
+          git config --local user.name "github-actions[bot]"
+          git add dashboard_web/public/dashboard.json
+          git commit -m "update: Regeneración automática de dashboard.json [skip ci]" || exit 0
+          git push

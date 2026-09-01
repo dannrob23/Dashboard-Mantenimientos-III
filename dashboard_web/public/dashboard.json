@@ -1,0 +1,552 @@
+{
+ "meta": {
+  "fuente": "Bitacora_Final_Dashboard_BAC.xlsx",
+  "mes": 9,
+  "ano": 2026,
+  "total_registros": 5,
+  "sin_departamento": 0,
+  "generado": "2026-09-01T08:52:28"
+ },
+ "kpis": {
+  "total": 5,
+  "ejecutadas": 0,
+  "pendientes": 5,
+  "avance": 0.0,
+  "evaluables": 0,
+  "cumplen": 0,
+  "desvian": 0,
+  "cumplimiento": 0,
+  "desviacion": 0,
+  "desv_prom": 0.0,
+  "por_completar": 0,
+  "acumulado_mes": 0,
+  "prom_diario": 0.0,
+  "max_dia": 0,
+  "ejecutadas_hoy": 0,
+  "equipos_impactados": 0,
+  "eficiencia_calidad": 0,
+  "actas_pendientes": 0,
+  "en_proceso_largo": 0,
+  "cuellos_botella": 0,
+  "proyeccion_mes": 0
+ },
+ "estados": [
+  {
+   "estado": "Programada",
+   "cantidad": 5
+  },
+  {
+   "estado": "En Proceso",
+   "cantidad": 0
+  },
+  {
+   "estado": "Finalizada",
+   "cantidad": 0
+  },
+  {
+   "estado": "Reprogramada",
+   "cantidad": 0
+  },
+  {
+   "estado": "Sede_Cerrada",
+   "cantidad": 0
+  },
+  {
+   "estado": "Cancelada",
+   "cantidad": 0
+  }
+ ],
+ "cronograma": {
+  "cumplen": 0,
+  "desvian": 0,
+  "evaluables": 0
+ },
+ "regiones": [
+  {
+   "region": "ANTIOQUIA",
+   "total": 1,
+   "ejecutadas": 0,
+   "evaluables": 0,
+   "cumplen": 0,
+   "desvian": 0,
+   "cumplimiento": 0,
+   "desviacion": 0,
+   "desv_prom": 0.0
+  },
+  {
+   "region": "ORIENTE",
+   "total": 3,
+   "ejecutadas": 0,
+   "evaluables": 0,
+   "cumplen": 0,
+   "desvian": 0,
+   "cumplimiento": 0,
+   "desviacion": 0,
+   "desv_prom": 0.0
+  },
+  {
+   "region": "COSTA",
+   "total": 1,
+   "ejecutadas": 0,
+   "evaluables": 0,
+   "cumplen": 0,
+   "desvian": 0,
+   "cumplimiento": 0,
+   "desviacion": 0,
+   "desv_prom": 0.0
+  },
+  {
+   "region": "SUR",
+   "total": 0,
+   "ejecutadas": 0,
+   "evaluables": 0,
+   "cumplen": 0,
+   "desvian": 0,
+   "cumplimiento": 0,
+   "desviacion": 0,
+   "desv_prom": 0.0
+  },
+  {
+   "region": "OCCIDENTE",
+   "total": 0,
+   "ejecutadas": 0,
+   "evaluables": 0,
+   "cumplen": 0,
+   "desvian": 0,
+   "cumplimiento": 0,
+   "desviacion": 0,
+   "desv_prom": 0.0
+  },
+  {
+   "region": "SANTANDERES",
+   "total": 0,
+   "ejecutadas": 0,
+   "evaluables": 0,
+   "cumplen": 0,
+   "desvian": 0,
+   "cumplimiento": 0,
+   "desviacion": 0,
+   "desv_prom": 0.0
+  },
+  {
+   "region": "CAFETERA",
+   "total": 0,
+   "ejecutadas": 0,
+   "evaluables": 0,
+   "cumplen": 0,
+   "desvian": 0,
+   "cumplimiento": 0,
+   "desviacion": 0,
+   "desv_prom": 0.0
+  },
+  {
+   "region": "BOGOTA",
+   "total": 0,
+   "ejecutadas": 0,
+   "evaluables": 0,
+   "cumplen": 0,
+   "desvian": 0,
+   "cumplimiento": 0,
+   "desviacion": 0,
+   "desv_prom": 0.0
+  },
+  {
+   "region": "DIRECCION GENERAL",
+   "total": 0,
+   "ejecutadas": 0,
+   "evaluables": 0,
+   "cumplen": 0,
+   "desvian": 0,
+   "cumplimiento": 0,
+   "desviacion": 0,
+   "desv_prom": 0.0
+  },
+  {
+   "region": "COA",
+   "total": 0,
+   "ejecutadas": 0,
+   "evaluables": 0,
+   "cumplen": 0,
+   "desvian": 0,
+   "cumplimiento": 0,
+   "desviacion": 0,
+   "desv_prom": 0.0
+  }
+ ],
+ "causales": [],
+ "aliados": [
+  {
+   "aliado": "GESTIONATECH",
+   "total": 5
+  }
+ ],
+ "plan_mensual": [
+  {
+   "mes": 10,
+   "ano": 2026,
+   "programadas": 1,
+   "ejecutadas": 0
+  }
+ ],
+ "diario": [
+  {
+   "fecha": "2026-09-01",
+   "ejecutadas": 0,
+   "programadas": 0,
+   "acumulado": 0,
+   "plan_acum": 0
+  },
+  {
+   "fecha": "2026-09-02",
+   "ejecutadas": 0,
+   "programadas": 0,
+   "acumulado": 0,
+   "plan_acum": 0
+  },
+  {
+   "fecha": "2026-09-03",
+   "ejecutadas": 0,
+   "programadas": 0,
+   "acumulado": 0,
+   "plan_acum": 0
+  },
+  {
+   "fecha": "2026-09-04",
+   "ejecutadas": 0,
+   "programadas": 0,
+   "acumulado": 0,
+   "plan_acum": 0
+  },
+  {
+   "fecha": "2026-09-05",
+   "ejecutadas": 0,
+   "programadas": 0,
+   "acumulado": 0,
+   "plan_acum": 0
+  },
+  {
+   "fecha": "2026-09-06",
+   "ejecutadas": 0,
+   "programadas": 0,
+   "acumulado": 0,
+   "plan_acum": 0
+  },
+  {
+   "fecha": "2026-09-07",
+   "ejecutadas": 0,
+   "programadas": 0,
+   "acumulado": 0,
+   "plan_acum": 0
+  },
+  {
+   "fecha": "2026-09-08",
+   "ejecutadas": 0,
+   "programadas": 0,
+   "acumulado": 0,
+   "plan_acum": 0
+  },
+  {
+   "fecha": "2026-09-09",
+   "ejecutadas": 0,
+   "programadas": 0,
+   "acumulado": 0,
+   "plan_acum": 0
+  },
+  {
+   "fecha": "2026-09-10",
+   "ejecutadas": 0,
+   "programadas": 0,
+   "acumulado": 0,
+   "plan_acum": 0
+  },
+  {
+   "fecha": "2026-09-11",
+   "ejecutadas": 0,
+   "programadas": 0,
+   "acumulado": 0,
+   "plan_acum": 0
+  },
+  {
+   "fecha": "2026-09-12",
+   "ejecutadas": 0,
+   "programadas": 0,
+   "acumulado": 0,
+   "plan_acum": 0
+  },
+  {
+   "fecha": "2026-09-13",
+   "ejecutadas": 0,
+   "programadas": 0,
+   "acumulado": 0,
+   "plan_acum": 0
+  },
+  {
+   "fecha": "2026-09-14",
+   "ejecutadas": 0,
+   "programadas": 0,
+   "acumulado": 0,
+   "plan_acum": 0
+  },
+  {
+   "fecha": "2026-09-15",
+   "ejecutadas": 0,
+   "programadas": 0,
+   "acumulado": 0,
+   "plan_acum": 0
+  },
+  {
+   "fecha": "2026-09-16",
+   "ejecutadas": 0,
+   "programadas": 0,
+   "acumulado": 0,
+   "plan_acum": 0
+  },
+  {
+   "fecha": "2026-09-17",
+   "ejecutadas": 0,
+   "programadas": 0,
+   "acumulado": 0,
+   "plan_acum": 0
+  },
+  {
+   "fecha": "2026-09-18",
+   "ejecutadas": 0,
+   "programadas": 0,
+   "acumulado": 0,
+   "plan_acum": 0
+  },
+  {
+   "fecha": "2026-09-19",
+   "ejecutadas": 0,
+   "programadas": 0,
+   "acumulado": 0,
+   "plan_acum": 0
+  },
+  {
+   "fecha": "2026-09-20",
+   "ejecutadas": 0,
+   "programadas": 0,
+   "acumulado": 0,
+   "plan_acum": 0
+  },
+  {
+   "fecha": "2026-09-21",
+   "ejecutadas": 0,
+   "programadas": 0,
+   "acumulado": 0,
+   "plan_acum": 0
+  },
+  {
+   "fecha": "2026-09-22",
+   "ejecutadas": 0,
+   "programadas": 0,
+   "acumulado": 0,
+   "plan_acum": 0
+  },
+  {
+   "fecha": "2026-09-23",
+   "ejecutadas": 0,
+   "programadas": 0,
+   "acumulado": 0,
+   "plan_acum": 0
+  },
+  {
+   "fecha": "2026-09-24",
+   "ejecutadas": 0,
+   "programadas": 0,
+   "acumulado": 0,
+   "plan_acum": 0
+  },
+  {
+   "fecha": "2026-09-25",
+   "ejecutadas": 0,
+   "programadas": 0,
+   "acumulado": 0,
+   "plan_acum": 0
+  },
+  {
+   "fecha": "2026-09-26",
+   "ejecutadas": 0,
+   "programadas": 0,
+   "acumulado": 0,
+   "plan_acum": 0
+  },
+  {
+   "fecha": "2026-09-27",
+   "ejecutadas": 0,
+   "programadas": 0,
+   "acumulado": 0,
+   "plan_acum": 0
+  },
+  {
+   "fecha": "2026-09-28",
+   "ejecutadas": 0,
+   "programadas": 0,
+   "acumulado": 0,
+   "plan_acum": 0
+  },
+  {
+   "fecha": "2026-09-29",
+   "ejecutadas": 0,
+   "programadas": 0,
+   "acumulado": 0,
+   "plan_acum": 0
+  },
+  {
+   "fecha": "2026-09-30",
+   "ejecutadas": 0,
+   "programadas": 0,
+   "acumulado": 0,
+   "plan_acum": 0
+  }
+ ],
+ "geo": [
+  {
+   "depto": "Cundinamarca",
+   "total": 3,
+   "programadas": 3,
+   "en_proceso": 0,
+   "finalizadas": 0,
+   "sede_cerrada": 0,
+   "reprogramadas": 0,
+   "regiones": [
+    "ORIENTE"
+   ],
+   "lat": 4.8,
+   "lon": -74.2,
+   "horario": "8:00 A.M.  A 3:00 P.M.",
+   "aliados": [
+    "GESTIONATECH"
+   ],
+   "intervenidas": 0,
+   "avance_pct": 0.0
+  },
+  {
+   "depto": "Atlantico",
+   "total": 1,
+   "programadas": 1,
+   "en_proceso": 0,
+   "finalizadas": 0,
+   "sede_cerrada": 0,
+   "reprogramadas": 0,
+   "regiones": [
+    "COSTA"
+   ],
+   "lat": 10.7,
+   "lon": -74.8,
+   "horario": "8:00 AM A 3:30 P.M.",
+   "aliados": [
+    "GESTIONATECH"
+   ],
+   "intervenidas": 0,
+   "avance_pct": 0.0
+  },
+  {
+   "depto": "Antioquia",
+   "total": 1,
+   "programadas": 1,
+   "en_proceso": 0,
+   "finalizadas": 0,
+   "sede_cerrada": 0,
+   "reprogramadas": 0,
+   "regiones": [
+    "ANTIOQUIA"
+   ],
+   "lat": 6.9,
+   "lon": -75.5,
+   "horario": "9:00 A.M. A 4:00 P.M.",
+   "aliados": [
+    "GESTIONATECH"
+   ],
+   "intervenidas": 0,
+   "avance_pct": 0.0
+  }
+ ],
+ "rows": [
+  {
+   "sban": "10",
+   "oficina": "Oficina Bogota",
+   "municipio": "Bogota",
+   "departamento": "Cundinamarca",
+   "region": "ORIENTE",
+   "aliado": "GESTIONATECH",
+   "horario": "8:00 AM A 3:30 P.M.",
+   "estado": "Programada",
+   "cumple": null,
+   "dias": null,
+   "causal": "Pendiente Firma",
+   "acta": "",
+   "f_prog_ini": "2026-10-07",
+   "f_ini_real": null,
+   "f_cierre": null
+  },
+  {
+   "sban": "20",
+   "oficina": "Oficina Costa",
+   "municipio": "Soledad",
+   "departamento": "Atlantico",
+   "region": "COSTA",
+   "aliado": "GESTIONATECH",
+   "horario": "8:00 AM A 3:30 P.M.",
+   "estado": "Programada",
+   "cumple": null,
+   "dias": null,
+   "causal": "Pendiente Firma",
+   "acta": "",
+   "f_prog_ini": null,
+   "f_ini_real": null,
+   "f_cierre": null
+  },
+  {
+   "sban": "70",
+   "oficina": "Oficina Antioquia",
+   "municipio": "Bello",
+   "departamento": "Antioquia",
+   "region": "ANTIOQUIA",
+   "aliado": "GESTIONATECH",
+   "horario": "9:00 A.M. A 4:00 P.M.",
+   "estado": "Programada",
+   "cumple": null,
+   "dias": null,
+   "causal": "Pendiente Firma",
+   "acta": "",
+   "f_prog_ini": null,
+   "f_ini_real": null,
+   "f_cierre": null
+  },
+  {
+   "sban": "230",
+   "oficina": "Oficina Bogota",
+   "municipio": "Bogota",
+   "departamento": "Cundinamarca",
+   "region": "ORIENTE",
+   "aliado": "GESTIONATECH",
+   "horario": "9:00 A.M. A 4:00 P.M.",
+   "estado": "Programada",
+   "cumple": null,
+   "dias": null,
+   "causal": "Pendiente Firma",
+   "acta": "",
+   "f_prog_ini": null,
+   "f_ini_real": null,
+   "f_cierre": null
+  },
+  {
+   "sban": "250",
+   "oficina": "Oficina Bogota",
+   "municipio": "Bogota",
+   "departamento": "Cundinamarca",
+   "region": "ORIENTE",
+   "aliado": "GESTIONATECH",
+   "horario": "8:00 A.M.  A 3:00 P.M.",
+   "estado": "Programada",
+   "cumple": null,
+   "dias": null,
+   "causal": "Pendiente Firma",
+   "acta": "",
+   "f_prog_ini": null,
+   "f_ini_real": null,
+   "f_cierre": null
+  }
+ ]
+}

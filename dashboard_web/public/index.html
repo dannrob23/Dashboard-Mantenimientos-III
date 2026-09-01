@@ -1,0 +1,912 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Tablero de Control · Mantenimientos Preventivos</title>
+<!-- Plotly local (funciona sin internet) con respaldo a CDN -->
+<script src="vendor/plotly.min.js" onerror="cargarPlotlyCDN()"></script>
+<script>
+function cargarPlotlyCDN(){
+  var s = document.createElement('script');
+  s.src = 'https://cdn.plotly.com/plotly-2.35.2.min.js';
+  s.onerror = function(){
+    var s2 = document.createElement('script');
+    s2.src = 'https://cdn.jsdelivr.net/npm/plotly.js-dist-min@2.35.2/plotly.min.js';
+    document.head.appendChild(s2);
+  };
+  document.head.appendChild(s);
+}
+</script>
+<style>
+  :root {
+    --navy: #0F172A; --ink: #1E293B; --muted: #64748B; --border: #E2E8F0;
+    --zebra: #F8FAFC; --green: #10B981; --red: #EF4444; --amber: #F59E0B;
+    --blue: #3B82F6; --light: #F1F5F9; --bg: #F3F4F6;
+    --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+    --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0.03);
+    --radius: 16px;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background: var(--bg); color: var(--ink); }
+  header { background: var(--navy); color: #fff; padding: 24px 28px; }
+  header h1 { font-size: 22px; font-weight: 600; letter-spacing: -0.5px; }
+  header .sub { font-size: 13px; color: #94A3B8; margin-top: 6px; }
+  header .badge { float: right; font-size: 12px; font-weight: 500; background: #334155; padding: 6px 12px; border-radius: 8px; color: #E2E8F0; }
+  main { padding: 20px 28px; max-width: 1500px; margin: 0 auto; }
+  
+  .filtros { background: rgba(255, 255, 255, 0.9); backdrop-filter: blur(8px); box-shadow: var(--shadow-sm); border-radius: var(--radius); padding: 12px 18px;
+             display: flex; gap: 14px; flex-wrap: wrap; align-items: center; margin-bottom: 24px;
+             position: sticky; top: 10px; z-index: 100; border: 1px solid rgba(255,255,255,0.2); }
+  .filtros .f-tit { font-size: 11px; font-weight: 700; letter-spacing: .8px; color: var(--navy); }
+  .filtros label { font-size: 12px; color: var(--muted); margin-right: 4px; font-weight: 500; }
+  .filtros button { padding: 8px 14px; border: none; border-radius: 8px; background: var(--light); font-weight: 500;
+                    font-size: 12px; color: var(--navy); cursor: pointer; transition: all 0.2s; }
+  .filtros button:hover { background: #E2E8F0; }
+  .filtros .f-resumen { font-size: 12px; color: var(--muted); margin-left: auto; font-weight: 500; }
+  
+  .kpis { margin-bottom: 24px; }
+  .hero { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 235px), 1fr)); gap: 16px; margin-bottom: 16px; }
+  /* Bento Grid UI */
+  .bento-grid { display: grid; grid-template-columns: 1fr; gap: 16px; margin-bottom: 24px; }
+  @media (min-width: 1024px) { .bento-grid { grid-template-columns: repeat(2, 1fr); } }
+  .bento-card { background: #fff; box-shadow: var(--shadow-sm); border-radius: var(--radius); padding: 20px; display: flex; flex-direction: column; }
+  .bento-title { font-size: 11px; text-transform: uppercase; letter-spacing: 0.6px; color: var(--muted); font-weight: 700; margin-bottom: 12px; display: flex; justify-content: space-between; align-items: baseline; }
+  .bento-total { color: var(--navy); font-size: 15px; }
+  .bento-note { font-size: 10px; color: var(--muted); margin-top: 10px; }
+
+  /* Segmented Funnel (barra apilada: suma 100% del total) */
+  .segmented-bar { display: flex; height: 14px; border-radius: 999px; overflow: hidden; margin: 12px 0 16px; background: #F1F5F9; }
+  .seg { width: 0%; transition: width 1s cubic-bezier(0.4, 0, 0.2, 1); }
+  .seg-ejec { background: linear-gradient(90deg, #10B981, #059669); box-shadow: 0 0 8px rgba(16, 185, 129, 0.4); }
+  .seg-pc { background: #CBD5E1; }
+  .seg-pend { background: linear-gradient(90deg, #F59E0B, #D97706); box-shadow: 0 0 8px rgba(245, 158, 11, 0.4); }
+  .seg-otras { background: #E2E8F0; }
+  .seg-labels { display: flex; gap: 16px; font-size: 12px; font-weight: 500; flex-wrap: wrap; }
+  .seg-labels > div { flex: 1; min-width: 100px; }
+  .seg-labels .num { display: block; font-size: 20px; font-weight: 800; color: var(--navy); margin-top: 2px; }
+  .seg-labels .dot { display: inline-block; width: 8px; height: 8px; border-radius: 50%; margin-right: 6px; }
+
+  /* Radial Progress (anillo de eficiencia) */
+  .radial-wrap { position: relative; width: 72px; height: 72px; margin: 10px auto; }
+  .radial-svg { transform: rotate(-90deg); width: 100%; height: 100%; }
+  .radial-bg { fill: none; stroke: #F1F5F9; stroke-width: 6; }
+  .radial-fill { fill: none; stroke: var(--blue); stroke-width: 6; stroke-linecap: round; stroke-dasharray: 201; stroke-dashoffset: 201; transition: stroke-dashoffset 1s ease-out; }
+  .radial-text { position: absolute; top: 0; left: 0; width: 100%; height: 100%; display: flex; align-items: center; justify-content: center; font-size: 14px; font-weight: 800; color: var(--navy); }
+  .kpi-center { align-items: center; text-align: center; }
+
+  /* Alert Card (warning suave: grita sin ensuciar el panel) */
+  .alert-card { border-radius: var(--radius); padding: 18px 20px; display: flex; flex-direction: column; justify-content: center; }
+  .alert-card.danger { background: linear-gradient(135deg, #FEF2F2, #FFF7ED); border: 1px solid #FECACA; border-left: 5px solid var(--red); box-shadow: 0 4px 14px rgba(239, 68, 68, 0.14); }
+  .alert-card.danger .alert-title { color: #DC2626; }
+  .alert-card.danger .alert-val { color: #B91C1C; }
+  .alert-card.danger .alert-desc { color: #9A3412; }
+  .alert-card.danger .alert-icon { display: inline-block; animation: pulseWarn 1.8s ease-in-out infinite; }
+  @keyframes pulseWarn { 0%, 100% { transform: scale(1); opacity: 1; } 50% { transform: scale(1.2); opacity: 0.65; } }
+  .alert-card.safe { background: #F8FAFC; color: var(--muted); border: 1px solid var(--border); }
+  .alert-card.safe .alert-title { color: var(--muted); }
+  .alert-card.safe .alert-val { color: var(--muted); }
+  .alert-card.safe .alert-desc { color: var(--muted); }
+  .alert-title { font-size: 11px; text-transform: uppercase; font-weight: 700; letter-spacing: 0.5px; margin-bottom: 8px; }
+  .alert-val { font-size: 32px; font-weight: 800; line-height: 1; margin-bottom: 6px; color: var(--navy); }
+  .alert-desc { font-size: 11px; opacity: 0.9; font-weight: 500; }
+  .chip { font-size: 12px; font-weight: 500; color: var(--navy); background: var(--light); border-radius: 8px; padding: 8px 14px; }
+
+  /* Tendencias (sparklines SVG nativas, sin Plotly) */
+  .trend-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 150px), 1fr)); gap: 16px; flex: 1; }
+  .trend-tile { display: flex; flex-direction: column; min-width: 0; }
+  .t-lab { font-size: 11px; color: var(--muted); font-weight: 700; text-transform: uppercase; letter-spacing: 0.4px; }
+  .t-val { font-size: 24px; font-weight: 800; color: var(--navy); letter-spacing: -0.5px; margin-top: 4px; }
+  .t-val small { font-size: 11px; font-weight: 600; color: var(--muted); letter-spacing: 0; }
+  .t-sub { font-size: 11px; color: var(--muted); font-weight: 500; margin-top: 2px; }
+  .t-spark { height: 40px; margin-top: auto; }
+  .spark-svg { width: 100%; height: 100%; display: block; }
+  
+  .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 420px), 1fr)); gap: 16px; margin-bottom: 24px; }
+  .panel { background: #fff; box-shadow: var(--shadow-sm); border-radius: var(--radius); padding: 20px; border: none; min-width: 0; }
+  .panel h2 { font-size: 13px; text-transform: uppercase; font-weight: 600; letter-spacing: .5px; color: var(--navy); margin-bottom: 12px; }
+  .panel h2 span { color: var(--muted); font-weight: 400; text-transform: none; letter-spacing: 0; }
+  .panel .chart { width: 100%; height: 300px; }
+  .full { grid-column: 1 / -1; }
+  #mapa { height: 520px; width: 100%; border-radius: 12px; overflow: hidden; }
+  
+  .controls { display: flex; gap: 12px; flex-wrap: wrap; margin-bottom: 16px; align-items: center; }
+  .controls label { font-size: 12px; color: var(--muted); font-weight: 500; margin-right: 4px; }
+  select, input { padding: 8px 12px; border: 1px solid var(--border); border-radius: 8px; font-size: 13px; background: #fff; transition: border-color 0.2s; }
+  select:focus, input:focus { outline: none; border-color: var(--blue); }
+  button { padding: 8px 14px; border: none; border-radius: 8px; background: var(--light); font-weight: 500; font-size: 12px; color: var(--navy); cursor: pointer; transition: all 0.2s; }
+  button:hover { background: #E2E8F0; }
+  
+  .tabla-scroll { max-height: 420px; overflow-y: auto; border-radius: 12px; border: 1px solid var(--border); }
+  table { width: 100%; border-collapse: collapse; font-size: 13px; text-align: left; }
+  th { background: #F8FAFC; color: var(--navy); padding: 12px 14px; font-weight: 600; border-bottom: 1px solid var(--border); position: sticky; top: 0; z-index: 10; }
+  td { padding: 10px 14px; border-bottom: 1px solid var(--border); color: var(--ink); }
+  tr:last-child td { border-bottom: none; }
+  tr:hover td { background: #F1F5F9; }
+  .num { text-align: right; font-variant-numeric: tabular-nums; }
+  footer { padding: 20px 28px 40px; font-size: 12px; color: var(--muted); text-align: center; }
+
+  /* Native KPI Cards (reemplazo de Plotly Gauges) */
+  .kpi-card { background: #fff; border-radius: var(--radius); box-shadow: var(--shadow-md); padding: 20px 24px; border: none; display: flex; flex-direction: column; justify-content: center; }
+  .kpi-header { display: flex; justify-content: space-between; align-items: flex-end; margin-bottom: 14px; }
+  .kpi-tit { font-size: 14px; font-weight: 700; color: var(--navy); display: flex; align-items: center; gap: 6px; }
+  .kpi-sub { font-size: 11px; color: var(--muted); margin-top: 4px; font-weight: 500; }
+  .kpi-val { font-size: 32px; font-weight: 800; letter-spacing: -1px; line-height: 1; text-shadow: 0 1px 2px rgba(0,0,0,0.05); }
+  
+  .kpi-bar-bg { position: relative; height: 12px; background: #E2E8F0; border-radius: 999px; margin-bottom: 4px; }
+  .kpi-bar-fill { height: 100%; border-radius: 999px; transition: width 1s cubic-bezier(0.4, 0, 0.2, 1); width: 0%; }
+  .kpi-target-line { position: absolute; top: -3px; bottom: -3px; width: 3px; background: var(--navy); border-radius: 2px; z-index: 2; box-shadow: 0 0 2px rgba(0,0,0,0.3); }
+  
+  /* Gradientes y Resplandores (Glows) */
+  .kpi-val.green { color: var(--green); }
+  .kpi-bar-fill.green { background: linear-gradient(90deg, #10B981, #059669); box-shadow: 0 0 8px rgba(16, 185, 129, 0.4); }
+  
+  .kpi-val.amber { color: var(--amber); }
+  .kpi-bar-fill.amber { background: linear-gradient(90deg, #F59E0B, #D97706); box-shadow: 0 0 8px rgba(245, 158, 11, 0.4); }
+  
+  .kpi-val.red { color: var(--red); }
+  .kpi-bar-fill.red { background: linear-gradient(90deg, #EF4444, #DC2626); box-shadow: 0 0 8px rgba(239, 68, 68, 0.4); }
+
+  .kpi-val.navy { color: var(--navy); }
+  .kpi-bar-fill.navy { background: linear-gradient(90deg, #3B82F6, #1E3A8A); box-shadow: 0 0 8px rgba(59, 130, 246, 0.4); }
+
+  /* Mobile-First Adaptations */
+  @media (max-width: 900px) {
+    header { padding: 16px 20px; }
+    header h1 { font-size: 18px; }
+    header .badge { display: block; margin-top: 10px; width: fit-content; }
+    main { padding: 12px 16px; }
+    .filtros { top: 0; padding: 12px; border-radius: 0; margin: -12px -16px 16px; border-left: none; border-right: none; border-top: none; }
+    .grid { grid-template-columns: 1fr; gap: 12px; }
+    .panel .chart { height: 260px; }
+    #mapa { height: 400px; }
+    .panel { padding: 16px; }
+    .progress { gap: 12px; }
+    
+    /* Responsive Table to Card List */
+    .tabla-scroll { border: none; background: transparent; overflow-y: visible; max-height: none; }
+    table, thead, tbody, th, td, tr { display: block; }
+    thead tr { display: none; }
+    tr { background: #fff; box-shadow: var(--shadow-sm); border-radius: 12px; margin-bottom: 12px; border: 1px solid var(--border); padding: 4px 0; }
+    tr:hover td { background: transparent; }
+    td { border-bottom: 1px solid var(--light); display: flex; justify-content: space-between; align-items: center; padding: 8px 14px; text-align: right; }
+    td:last-child { border-bottom: none; }
+    td::before { content: attr(data-label); font-weight: 600; color: var(--muted); font-size: 11px; text-transform: uppercase; text-align: left; margin-right: 12px; }
+    .num { text-align: right; }
+  }
+</style>
+</head>
+<body>
+<header>
+  <span class="badge" id="badge">Actualizando…</span>
+  <h1>TABLERO DE CONTROL · MANTENIMIENTOS PREVENTIVOS</h1>
+  <div class="sub">Ecosistema operacional — Fuente: <b>Bitacora_Diaria.xlsx</b> + Cronograma maestro (SBAN) · actualizado automáticamente</div>
+</header>
+
+<main>
+  <div class="filtros">
+    <span class="f-tit">FILTROS GLOBALES</span>
+    <div><label>Mes:</label><select id="f_mes"><option value="">TODOS</option></select></div>
+    <div><label>Jefatura:</label><select id="f_region"><option value="">TODAS</option></select></div>
+    <div><label>Aliado:</label><select id="f_aliado"><option value="">TODOS</option></select></div>
+    <div><label>Estado:</label><select id="f_estado"><option value="">TODOS</option></select></div>
+    <button id="f_limpiar">Limpiar filtros</button>
+    <span class="f-resumen" id="f_resumen"></span>
+  </div>
+
+  <section class="kpis" id="kpis"></section>
+
+  <div class="grid">
+    <div class="panel"><h2>Avance diario — Plan vs Ejecutado</h2><div id="g_diario" class="chart"></div></div>
+    <div class="panel"><h2>Curva S — Plan acumulado vs Real (con proyección)</h2><div id="g_acum" class="chart"></div></div>
+    <div class="panel"><h2>Distribución por estado</h2><div id="g_estado" class="chart"></div></div>
+    <div class="panel"><h2>Mantenimientos por región</h2><div id="g_region" class="chart"></div></div>
+    <div class="panel"><h2>Pareto de desviaciones (80/20)</h2><div id="g_causal" class="chart"></div></div>
+    <div class="panel"><h2>Plan por mes (cronograma)</h2><div id="g_mes" class="chart"></div></div>
+    <div class="panel"><h2>Mantenimientos por aliado</h2><div id="g_aliado" class="chart"></div></div>
+  </div>
+
+  <div class="grid">
+    <div class="panel full">
+      <h2>Mapa de intervención por departamento <span>— clic en un departamento filtra el directorio</span></h2>
+      <div class="controls">
+        <div><label>Indicador:</label>
+          <select id="sel_ind">
+            <option value="avance_pct">% Avance (intervenidas / total)</option>
+            <option value="intervenidas">Intervenidas (cantidad)</option>
+            <option value="programadas">Programadas (cantidad)</option>
+          </select>
+        </div>
+        <span style="font-size:11px;color:var(--muted);align-self:center" id="mapa_modo"></span>
+      </div>
+      <div id="mapa"></div>
+    </div>
+    <div class="panel full">
+      <h2>Detalle por departamento</h2>
+      <div class="tabla-scroll"><table id="tabla_depto">
+        <thead><tr>
+          <th>Departamento</th><th>Región(es)</th>
+          <th class="num">Total</th><th class="num">Programadas</th><th class="num">En proceso</th>
+          <th class="num">Finalizadas</th><th class="num">Sede cerrada</th>
+          <th class="num">Intervenidas</th><th class="num">% Avance</th><th>Horario</th>
+        </tr></thead><tbody></tbody>
+      </table></div>
+    </div>
+    <div class="panel full">
+      <h2>Directorio de oficinas <span>— buscar por SBAN, nombre o departamento</span></h2>
+      <div class="controls">
+        <input id="busca_oficina" type="text" placeholder="Buscar por SBAN, nombre de oficina o departamento…"
+               style="flex:1;min-width:220px;padding:7px 10px;border:1px solid var(--border);border-radius:6px;font-size:12px">
+        <div><label>Estado:</label>
+          <select id="sel_estado_oficina"><option value="">TODOS</option></select>
+        </div>
+        <button id="btn_export" title="Descargar la lista visible en CSV">⬇ Exportar CSV</button>
+        <span style="font-size:11px;color:var(--muted);align-self:center" id="n_oficinas"></span>
+      </div>
+      <div class="tabla-scroll" style="max-height:420px">
+        <table id="tabla_oficinas">
+          <thead><tr>
+            <th>SBAN</th><th>Nombre Oficina</th><th>Municipio</th><th>Departamento</th>
+            <th>Región</th><th>Horario</th><th>Estado</th><th>Aliado</th>
+          </tr></thead><tbody></tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</main>
+
+<footer id="footer"></footer>
+
+<script>
+const COLORES = { navy:'#1E293B', muted:'#64748B', green:'#16A34A', red:'#DC2626',
+                  amber:'#F59E0B', blue:'#3B82F6', gray:'#94A3B8', light:'#E2E8F0' };
+const fmt = new Intl.NumberFormat('es-CO');
+const pct = v => (v*100).toFixed(1).replace('.',',') + ' %';
+/* fecha ISO "2026-09-01T10:02:44" -> "01/09/2026 10:02" (es-CO) */
+function fmtFecha(iso){
+  const m = (iso||'').match(/^(\d{4})-(\d{2})-(\d{2})T?(\d{2}):(\d{2})?/);
+  return m ? `${m[3]}/${m[2]}/${m[1]}${m[4]?' '+m[4]+':'+(m[5]||'00'):''}` : (iso||'');
+}
+
+function norm(s){
+  return (s||'').normalize('NFD').replace(/[\u0300-\u036f]/g,'')
+    .replace(/[^A-Za-z0-9 ]+/g,' ').toUpperCase().replace(/\s+/g,' ').trim();
+}
+
+const CLAVE_EST = {Programada:'programadas','En Proceso':'en_proceso',Finalizada:'finalizadas',
+                   Reprogramada:'reprogramadas',Sede_Cerrada:'sede_cerrada',Cancelada:'canceladas'};
+const EST_COL = {Programada:'#94A3B8','En Proceso':'#3B82F6',Finalizada:'#16A34A',
+                 Reprogramada:'#F59E0B',Sede_Cerrada:'#1E293B',Cancelada:'#DC2626'};
+
+/* estado global: DATOS (JSON servidor), F (filtros), D (dataset calculado) */
+let DATOS = null, GEOJSON = null, geoKey = null;
+const F = { mes:'', region:'', aliado:'', estado:'' };
+let D = null;
+
+const hoy = (()=>{ const n=new Date(); return {y:n.getFullYear(), m:n.getMonth()+1, d:n.getDate()}; })();
+const parseISO = s => { if(!s) return null; const p=s.split('-'); return {y:+p[0], m:+p[1], d:+p[2]}; };
+const diffDias = (a,b) => Math.round((Date.UTC(a.y,a.m-1,a.d)-Date.UTC(b.y,b.m-1,b.d))/86400000);
+function mesDe(r){
+  const p=parseISO(r.f_prog_ini), c=parseISO(r.f_cierre), i=parseISO(r.f_ini_real);
+  const f = p||c||i;
+  return f ? {m:f.m, y:f.y} : null;
+}
+function enMes(r, mm, aa){
+  const md = mesDe(r);
+  return !!md && md.m===mm && md.y===aa;
+}
+
+/* ---------------- cálculo central (Fase 2: agregación en el navegador) ---------------- */
+function filtrarRows(){
+  let rows = DATOS.rows.slice();
+  if(F.region) rows = rows.filter(r=>r.region===F.region);
+  if(F.aliado) rows = rows.filter(r=>r.aliado===F.aliado);
+  if(F.estado) rows = rows.filter(r=>r.estado===F.estado);
+  if(F.mes){
+    const p=F.mes.split('-'); const aa=+p[0], mm=+p[1];
+    rows = rows.filter(r=>enMes(r, mm, aa));
+  }
+  return rows;
+}
+
+function calcularTodo(){
+  const rows = filtrarRows();
+  const esRed = r => r.region!=='DIRECCION GENERAL' && r.region!=='COA';
+  const cuenta = e => rows.filter(r=>r.estado===e).length;
+  const ejecutadas = cuenta('Finalizada')+cuenta('Sede_Cerrada');
+  const pendientes = cuenta('Programada')+cuenta('En Proceso')+cuenta('Reprogramada');
+  const red = rows.filter(esRed);
+  const cumplenR = red.filter(r=>r.cumple==='SÍ').length;
+  const noR = red.filter(r=>r.cumple==='NO').length;
+  const reproR = red.filter(r=>r.estado==='Reprogramada').length;
+  const evR = cumplenR+noR+reproR, desvR = noR+reproR;
+  const ejecR = red.filter(r=>r.estado==='Finalizada'||r.estado==='Sede_Cerrada').length;
+  const cerR = red.filter(r=>r.estado==='Sede_Cerrada').length;
+  const diasNo = red.filter(r=>r.cumple==='NO'&&r.dias!=null).map(r=>r.dias);
+  const porCompletar = ejecutadas - rows.filter(r=>(r.estado==='Finalizada'||r.estado==='Sede_Cerrada')&&r.f_cierre).length;
+  const actasPend = rows.filter(r=>r.estado==='Finalizada'&&r.acta==='Pendiente Firma').length;
+  const enProcLargo = rows.filter(r=>r.estado==='En Proceso'&&r.f_ini_real)
+                          .filter(r=>{const fi=parseISO(r.f_ini_real); return fi && diffDias(hoy,fi)>2 && fi.y<=hoy.y;}).length;
+  const ejecHoy = rows.filter(r=>{const c=parseISO(r.f_cierre); return c&&c.y===hoy.y&&c.m===hoy.m&&c.d===hoy.d;}).length;
+
+  /* serie diaria del periodo */
+  const aa = F.mes ? +F.mes.split('-')[0] : DATOS.meta.ano;
+  const mm = F.mes ? +F.mes.split('-')[1] : DATOS.meta.mes;
+  const diasMes = new Date(aa, mm, 0).getDate();
+  const diario = [];
+  let planAcum = 0, acumuladoMes = 0, maxDia = 0;
+  for(let d=1; d<=diasMes; d++){
+    const prog = rows.filter(r=>{const p=parseISO(r.f_prog_ini); return p&&p.y===aa&&p.m===mm&&p.d===d;}).length;
+    const ej = rows.filter(r=>{const c=parseISO(r.f_cierre); return c&&c.y===aa&&c.m===mm&&c.d===d;}).length;
+    const acum = rows.filter(r=>{const c=parseISO(r.f_cierre);
+      return c && (c.y<aa || (c.y===aa && (c.m<mm || (c.m===mm && c.d<=d))));}).length;
+    planAcum += prog; acumuladoMes = acum; maxDia = Math.max(maxDia, ej);
+    diario.push({fecha:`${aa}-${String(mm).padStart(2,'0')}-${String(d).padStart(2,'0')}`,
+                 programadas:prog, ejecutadas:ej, acumulado:acum, plan_acum:planAcum});
+  }
+  const diasTrans = Math.max(1, Math.min(hoy.d, diasMes));
+  const promDiario = +(acumuladoMes/diasTrans).toFixed(2);
+  const proyeccion = Math.round((acumuladoMes/diasTrans)*diasMes);
+
+  /* estados / regiones / causales / aliados / plan mensual */
+  const estados = DATOS.estados.map(e=>({estado:e.estado, cantidad:cuenta(e.estado)}));
+  const regiones = DATOS.regiones.map(reg=>{
+    const rs = rows.filter(r=>r.region===reg);
+    const cum = rs.filter(r=>r.cumple==='SÍ').length;
+    const nv = rs.filter(r=>r.cumple==='NO').length;
+    const rp = rs.filter(r=>r.estado==='Reprogramada').length;
+    const ev = cum+nv+rp;
+    const dn = rs.filter(r=>r.cumple==='NO'&&r.dias!=null).map(r=>r.dias);
+    return {region:reg, total:rs.length,
+      ejecutadas:rs.filter(r=>r.estado==='Finalizada'||r.estado==='Sede_Cerrada').length,
+      evaluables:ev, cumplen:cum, desvian:nv+rp,
+      cumplimiento:ev?cum/ev:0, desviacion:ev?(nv+rp)/ev:0,
+      desv_prom:dn.length?+(dn.reduce((a,b)=>a+b,0)/dn.length).toFixed(2):0};
+  });
+  const causMap={};
+  rows.forEach(r=>{ if(r.causal) causMap[r.causal]=(causMap[r.causal]||0)+1; });
+  const causales = Object.keys(causMap).map(c=>({causal:c, casos:causMap[c]})).sort((a,b)=>b.casos-a.casos);
+  const totC = causales.reduce((a,c)=>a+c.casos,0)||1;
+  let ac=0; causales.forEach(c=>{ ac+=c.casos; c.acum=+((ac/totC)*100).toFixed(1); });
+  const aliMap={};
+  rows.forEach(r=>{ if(r.aliado) aliMap[r.aliado]=(aliMap[r.aliado]||0)+1; });
+  const aliados = Object.keys(aliMap).map(a=>({aliado:a,total:aliMap[a]})).sort((a,b)=>b.total-a.total);
+  const pmes={};
+  rows.forEach(r=>{ const md=mesDe(r); if(md){ const k=`${md.y}-${md.m}`;
+    pmes[k]=pmes[k]||{mes:md.m,ano:md.y,programadas:0,ejecutadas:0};
+    if(parseISO(r.f_prog_ini)) pmes[k].programadas++;
+    if(parseISO(r.f_cierre)) pmes[k].ejecutadas++; } });
+  const planMensual = Object.keys(pmes).sort().map(k=>pmes[k]);
+
+  /* geo por departamento */
+  const porNom={}; DATOS.geo.forEach(g=>porNom[norm(g.depto)]=g);
+  const accGeo={};
+  rows.forEach(r=>{ const k=norm(r.departamento); if(!k) return;
+    const a=accGeo[k]||(accGeo[k]={total:0,programadas:0,en_proceso:0,finalizadas:0,sede_cerrada:0,reprogramadas:0});
+    a.total++; const ck=CLAVE_EST[r.estado]; if(ck) a[ck]++; });
+  const geo = Object.keys(accGeo).map(k=>{
+    const g=porNom[k]||{}, a=accGeo[k];
+    a.depto=g.depto||k; a.lat=g.lat||null; a.lon=g.lon||null;
+    a.regiones=g.regiones||[]; a.horario=g.horario||null;
+    a.intervenidas=a.finalizadas+a.sede_cerrada+a.en_proceso;
+    a.avance_pct=a.total?Math.round(a.intervenidas/a.total*1000)/10:0;
+    return a; }).sort((x,y)=>y.total-x.total);
+
+  const kpis = {
+    total: rows.length, ejecutadas, pendientes,
+    avance: rows.length?ejecutadas/rows.length:0,
+    evaluables:evR, cumplen:cumplenR, desvian:desvR,
+    cumplimiento:evR?cumplenR/evR:0, desviacion:evR?desvR/evR:0,
+    desv_prom:diasNo.length?+(diasNo.reduce((a,b)=>a+b,0)/diasNo.length).toFixed(2):0,
+    por_completar:porCompletar, acumulado_mes:acumuladoMes, prom_diario:promDiario,
+    max_dia:maxDia, ejecutadas_hoy:ejecHoy,
+    eficiencia_calidad:ejecR?cerR/ejecR:0, actas_pendientes:actasPend,
+    en_proceso_largo:enProcLargo, cuellos_botella:actasPend+enProcLargo,
+    proyeccion_mes:proyeccion,
+  };
+  return {rows, kpis, estados, regiones, causales, aliados, plan_mensual:planMensual, diario, geo};
+}
+
+function recomputar(){
+  D = calcularTodo();
+  try { renderKpis(); } catch(e){ console.error(e); }
+  try { renderGraficos(); } catch(e){ console.error(e); }
+  try { renderTablaDepto(); } catch(e){ console.error(e); }
+  try { renderOficinas(); } catch(e){ console.error(e); }
+  try { renderMapa(); } catch(e){ console.error(e); }
+  document.getElementById('f_resumen').textContent =
+    `Mostrando ${fmt.format(D.rows.length)} de ${fmt.format(DATOS.rows.length)} sedes · `+
+    `${fmt.format(D.kpis.ejecutadas)} ejecutadas`;
+}
+
+/* ---------------- indicadores ---------------- */
+/* Sparkline SVG nativa (sin Plotly): línea + área con degradado */
+function svgSpark(valores, color, gid){
+  const w = 100, h = 34, n = valores.length;
+  if (!n) return '';
+  const max = Math.max(...valores);
+  const pts = valores.map((v,i)=>{
+    const x = n > 1 ? (i/(n-1))*w : w/2;
+    const y = h - 3 - (max > 0 ? (v/max)*(h-8) : 0);
+    return x.toFixed(1) + ',' + y.toFixed(1);
+  });
+  const line = pts.join(' ');
+  return `<svg class="spark-svg" viewBox="0 0 ${w} ${h}" preserveAspectRatio="none" aria-hidden="true">
+    <defs><linearGradient id="sg${gid}" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="${color}" stop-opacity="0.28"/>
+      <stop offset="100%" stop-color="${color}" stop-opacity="0.02"/>
+    </linearGradient></defs>
+    <polygon points="0,${h} ${line} ${w},${h}" fill="url(#sg${gid})"/>
+    <polyline points="${line}" fill="none" stroke="${color}" stroke-width="1.8"
+      stroke-linecap="round" stroke-linejoin="round" vector-effect="non-scaling-stroke"/>
+  </svg>`;
+}
+
+function renderKpis(){
+  const k = D.kpis;
+  const totalSedes = D.rows.length;
+  const diario = D.diario;
+  const serieEjec = diario.map(x=>x.ejecutadas);
+  const serieAcum = diario.map(x=>x.acumulado);
+  const seriePend = diario.map(x=>Math.max(0, totalSedes - x.acumulado));
+
+  const cump_pct = (k.cumplimiento*100).toFixed(1);
+  const cump_color = k.cumplimiento >= 0.95 ? 'green' : (k.cumplimiento >= 0.9 ? 'amber' : 'red');
+  const desv_pct = (k.desviacion*100).toFixed(1);
+  const desv_color = k.desviacion <= 0.05 ? 'green' : (k.desviacion <= 0.1 ? 'amber' : 'red');
+  const avance_pct = (k.avance*100).toFixed(1);
+
+  /* Anillo de eficiencia: offset del trazo = 201 * (1 - fraccion) */
+  const efi = Math.min(Math.max(k.eficiencia_calidad || 0, 0), 1);
+  const ringOffset = (201 * (1 - efi)).toFixed(1);
+
+  /* Embudo apilado: los tramos suman exactamente el 100% del total */
+  const porCompletar = Math.max(0, k.por_completar || 0);
+  const ejecConCierre = Math.max(0, k.ejecutadas - porCompletar);
+  const otras = Math.max(0, totalSedes - k.ejecutadas - k.pendientes);
+  const w = n => totalSedes ? (n/totalSedes*100).toFixed(2) : 0;
+
+  const isDanger = k.cuellos_botella > 0;
+  const alertClass = isDanger ? 'danger' : 'safe';
+  const alertIcon = isDanger ? '⚠️' : '✅';
+
+  document.getElementById('kpis').innerHTML = `
+    <div class="hero">
+      <div class="kpi-card">
+        <div class="kpi-header">
+          <div><div class="kpi-tit">🎯 Tasa de cumplimiento</div><div class="kpi-sub">SÍ / Evaluables · meta 95%</div></div>
+          <div class="kpi-val ${cump_color}">${cump_pct}%</div>
+        </div>
+        <div class="kpi-bar-bg">
+          <div class="kpi-bar-fill ${cump_color}" style="width: 0%" data-width="${Math.min(cump_pct, 100)}%"></div>
+          <div class="kpi-target-line" style="left: 95%" title="Meta: 95%"></div>
+        </div>
+      </div>
+
+      <div class="kpi-card">
+        <div class="kpi-header">
+          <div><div class="kpi-tit">⏱️ Desviación cronograma</div><div class="kpi-sub">(NO + Repro.) / Evaluables · tope 10%</div></div>
+          <div class="kpi-val ${desv_color}">${desv_pct}%</div>
+        </div>
+        <div class="kpi-bar-bg">
+          <div class="kpi-bar-fill ${desv_color}" style="width: 0%" data-width="${Math.min(desv_pct, 100)}%"></div>
+          <div class="kpi-target-line" style="left: 10%" title="Tope: 10%"></div>
+        </div>
+      </div>
+
+      <div class="kpi-card kpi-center">
+        <div class="kpi-tit">🎯 Eficiencia Auditoría</div>
+        <div class="radial-wrap">
+          <svg class="radial-svg" viewBox="0 0 80 80">
+            <circle class="radial-bg" cx="40" cy="40" r="32"></circle>
+            <circle class="radial-fill" cx="40" cy="40" r="32" style="stroke-dashoffset: 201" data-offset="${ringOffset}"></circle>
+          </svg>
+          <div class="radial-text">${pct(k.eficiencia_calidad || 0)}</div>
+        </div>
+        <div class="kpi-sub">Sedes cerradas / Ejecutadas</div>
+      </div>
+
+      <div class="alert-card ${alertClass}">
+        <div class="alert-title"><span class="alert-icon">${alertIcon}</span> Cuellos de botella</div>
+        <div class="alert-val">${fmt.format(k.cuellos_botella)}</div>
+        <div class="alert-desc">${fmt.format(k.actas_pendientes)} actas pendientes de firma<br>${fmt.format(k.en_proceso_largo)} en proceso &gt;48h</div>
+      </div>
+    </div>
+
+    <div class="bento-grid">
+      <!-- Bloque 1: Estado del inventario (embudo apilado) -->
+      <div class="bento-card bento-funnel">
+        <div class="bento-title"><span>📊 Estado del inventario de sedes</span><span class="bento-total">Total: ${fmt.format(totalSedes)}</span></div>
+        <div class="segmented-bar">
+          <div class="seg seg-ejec" style="width:0%" data-width="${w(ejecConCierre)}%" title="Ejecutadas con cierre: ${fmt.format(ejecConCierre)}"></div>
+          ${porCompletar > 0 ? `<div class="seg seg-pc" style="width:0%" data-width="${w(porCompletar)}%" title="Ejecutadas sin cierre: ${fmt.format(porCompletar)}"></div>` : ''}
+          <div class="seg seg-pend" style="width:0%" data-width="${w(k.pendientes)}%" title="Pendientes: ${fmt.format(k.pendientes)}"></div>
+          ${otras > 0 ? `<div class="seg seg-otras" style="width:0%" data-width="${w(otras)}%" title="Otras: ${fmt.format(otras)}"></div>` : ''}
+        </div>
+        <div class="seg-labels">
+          <div><span style="color:var(--muted);"><i class="dot" style="background:var(--green)"></i>Ejecutadas</span><span class="num">${fmt.format(k.ejecutadas)}</span></div>
+          <div><span style="color:var(--muted);"><i class="dot" style="background:var(--amber)"></i>Pendientes</span><span class="num">${fmt.format(k.pendientes)}</span></div>
+          <div><span style="color:var(--muted);"><i class="dot" style="background:#CBD5E1"></i>Por completar</span><span class="num">${fmt.format(porCompletar)}</span></div>
+          ${otras > 0 ? `<div><span style="color:var(--muted);"><i class="dot" style="background:#E2E8F0"></i>Otras</span><span class="num">${fmt.format(otras)}</span></div>` : ''}
+        </div>
+        ${porCompletar > 0 ? '<div class="bento-note">El tramo gris son sedes ejecutadas que aún no registran fecha de cierre.</div>' : ''}
+      </div>
+
+      <!-- Bloque 2: Tendencias del mes (sparklines SVG nativas agrupadas) -->
+      <div class="bento-card bento-trends">
+        <div class="bento-title"><span>📈 Tendencia del mes</span><span class="bento-total">${fmt.format(k.acumulado_mes)} acumulados</span></div>
+        <div class="trend-grid">
+          <div class="trend-tile">
+            <div class="t-lab">Ejecución diaria</div>
+            <div class="t-val">${k.prom_diario.toFixed(2).replace('.', ',')} <small>cierres/día</small></div>
+            <div class="t-spark">${svgSpark(serieEjec, '#16A34A', 'ej')}</div>
+          </div>
+          <div class="trend-tile">
+            <div class="t-lab">Acumulado</div>
+            <div class="t-val">${fmt.format(k.acumulado_mes)}</div>
+            <div class="t-sub">Proyección: ${fmt.format(k.proyeccion_mes)} cierres</div>
+            <div class="t-spark">${svgSpark(serieAcum, '#3B82F6', 'ac')}</div>
+          </div>
+          <div class="trend-tile">
+            <div class="t-lab">Pendientes restantes</div>
+            <div class="t-val">${fmt.format(Math.max(0, totalSedes - k.acumulado_mes))}</div>
+            <div class="t-spark">${svgSpark(seriePend, '#F59E0B', 'pd')}</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="kpi-card" style="margin-bottom:24px;">
+      <div class="kpi-header" style="align-items:center;">
+        <div>
+          <div class="kpi-tit" style="text-transform:uppercase; letter-spacing:0.5px;">🚀 Avance del plan</div>
+          <div class="kpi-sub">Ejecutadas / Total planificadas</div>
+        </div>
+        <div class="kpi-val navy">${avance_pct}%</div>
+      </div>
+      <div class="kpi-bar-bg" style="height:16px;">
+        <div class="kpi-bar-fill navy" style="width: 0%" data-width="${Math.min(avance_pct, 100)}%"></div>
+      </div>
+      <div style="margin-top:14px; display:flex; justify-content:space-between;">
+        <span class="chip">Hoy: ${fmt.format(k.ejecutadas_hoy)} ejecutadas · Desv. promedio: ${k.desv_prom.toFixed(1).replace('.',',')} días</span>
+      </div>
+    </div>
+  `;
+
+  // Animar barras y anillo de forma nativa
+  setTimeout(() => {
+    document.querySelectorAll('.kpi-bar-fill, .seg').forEach(el => {
+      el.style.width = el.getAttribute('data-width');
+    });
+    document.querySelectorAll('.radial-fill').forEach(el => {
+      el.style.strokeDashoffset = el.getAttribute('data-offset');
+    });
+  }, 50);
+}
+
+/* ---------------- graficos ---------------- */
+const esMovil = window.innerWidth < 900;
+const PLOT = { responsive:true, displaylogo:false, displayModeBar:false };
+function plot(div, data, layout){
+  const base = {
+    font:{family:'Inter, Segoe UI, sans-serif', size:11},
+    margin:{l:54,r:16,t:28,b:44},
+    paper_bgcolor:'transparent', plot_bgcolor:'transparent',
+    height: layout.height || (esMovil ? 260 : 310),
+    locale:'es', dragmode: esMovil ? false : 'zoom',
+    xaxis:{automargin:true},
+    yaxis:{automargin:true}
+  };
+  Plotly.newPlot(div, data, Object.assign(base, layout), PLOT);
+}
+
+function renderGraficos(){
+  const diario = D.diario;
+  const fechas = diario.map(d=>{ const p=d.fecha.split('-'); return `${p[2]}/${p[1]}`; });
+  plot('g_diario', [
+    {x:fechas, y:diario.map(d=>d.programadas), type:'bar', name:'Programadas', marker:{color:COLORES.navy}},
+    {x:fechas, y:diario.map(d=>d.ejecutadas), type:'bar', name:'Ejecutadas', marker:{color:COLORES.green}},
+  ], {barmode:'group', margin:{l:54,r:16,t:40,b:46},
+      xaxis:{automargin:true, tickangle:-45, nticks:10, tickfont:{size:9}},
+      yaxis:{automargin:true}, legend:{orientation:'h', x:0, y:1.14}});
+
+  // Curva S: plan acumulado vs real acumulado + proyección al cierre de mes
+  const proyX = fechas.map(()=>null), proyY = fechas.map(()=>null);
+  const dias = diario.length;
+  const hd = Math.min(hoy.d, dias);
+  const acumHoy = hd>0 ? diario[hd-1].acumulado : 0;
+  const proy = D.kpis.proyeccion_mes;
+  if(hd < dias){
+    for(let i=hd; i<dias; i++){
+      proyX[i]=fechas[i];
+      proyY[i]=Math.round(acumHoy + (proy-acumHoy)*(i-hd+1)/(dias-hd));
+    }
+  }
+  plot('g_acum', [
+    {x:fechas, y:diario.map(d=>d.plan_acum), type:'scatter', mode:'lines', name:'Plan acumulado',
+     line:{color:COLORES.navy, width:2, dash:'dash'}},
+    {x:fechas, y:diario.map(d=>d.acumulado), type:'scatter', mode:'lines+markers', name:'Real ejecutado',
+     line:{color:COLORES.green, width:2}, marker:{color:COLORES.green, size:4}},
+    {x:proyX, y:proyY, type:'scatter', mode:'lines', name:'Proyección',
+     line:{color:COLORES.blue, width:2, dash:'dot'}, connectgaps:false},
+  ], {showlegend:true, legend:{orientation:'h', x:0, y:1.14},
+      xaxis:{automargin:true, tickangle:-45, nticks:10, tickfont:{size:9}},
+      yaxis:{automargin:true}});
+
+  const est = D.estados.filter(e=>e.cantidad>0);
+  const colEst = {Programada:COLORES.gray, 'En Proceso':COLORES.blue, Finalizada:COLORES.green,
+                  Reprogramada:COLORES.amber, Sede_Cerrada:COLORES.navy, Cancelada:COLORES.red};
+  const abrevia = {Programada:'Programada', 'En Proceso':'En proceso', Finalizada:'Finalizada',
+                   Reprogramada:'Reprog.', Sede_Cerrada:'Sede cerrada', Cancelada:'Cancelada'};
+  plot('g_estado', [
+    {labels:est.map(e=>abrevia[e.estado]||e.estado), customdata:est.map(e=>e.estado),
+     values:est.map(e=>e.cantidad), type:'pie',
+     textinfo:'label+value', hole:.45, automargin:true, textfont:{size:11},
+     hovertemplate:'%{customdata}: %{value} (%{percent})<extra></extra>',
+     marker:{colors:est.map(e=>colEst[e.estado]||COLORES.muted)}},
+  ], {margin:{l:16,r:16,t:10,b:10}});
+
+  const reg = [...D.regiones].sort((a,b)=>b.total-a.total);
+  plot('g_region', [
+    {x:reg.map(r=>r.region), y:reg.map(r=>r.total), type:'bar', name:'Total', marker:{color:COLORES.light}},
+    {x:reg.map(r=>r.region), y:reg.map(r=>r.ejecutadas), type:'bar', name:'Ejecutadas', marker:{color:COLORES.navy}},
+  ], {barmode:'group', margin:{l:54,r:16,t:40,b:46},
+      xaxis:{automargin:true, tickangle:-40, nticks:10, tickfont:{size:9}},
+      yaxis:{automargin:true}, legend:{orientation:'h', x:0, y:1.14}});
+
+  // Pareto 80/20: barras + % acumulado + referencia 80%
+  const caus = D.causales;
+  plot('g_causal', [
+    {x:caus.map(c=>c.causal), y:caus.map(c=>c.casos), type:'bar', name:'Casos',
+     marker:{color:COLORES.amber}},
+    {x:caus.map(c=>c.causal), y:caus.map(c=>c.acum), type:'scatter', mode:'lines+markers',
+     name:'% acumulado', yaxis:'y2', line:{color:COLORES.navy, width:2}, marker:{size:4}},
+  ], {margin:{l:54,r:46,t:40,b:46},
+      xaxis:{automargin:true, tickangle:-30, tickfont:{size:9}},
+      yaxis:{automargin:true, title:{text:'Casos'}},
+      yaxis2:{overlaying:'y', side:'right', automargin:true, range:[0,105], title:{text:'% acumulado'}},
+      shapes:[{type:'line', xref:'paper', x0:0, x1:1, yref:'y2', y0:80, y1:80,
+               line:{color:COLORES.red, width:1, dash:'dash'}}],
+      legend:{orientation:'h', x:0, y:1.14}});
+
+  const mesN = D.plan_mensual || [];
+  plot('g_mes', [
+    {x:mesN.map(m=>`${String(m.mes).padStart(2,'0')}/${m.ano}`), y:mesN.map(m=>m.programadas),
+     type:'bar', name:'Programadas', marker:{color:COLORES.navy}},
+    {x:mesN.map(m=>`${String(m.mes).padStart(2,'0')}/${m.ano}`), y:mesN.map(m=>m.ejecutadas),
+     type:'bar', name:'Ejecutadas', marker:{color:COLORES.green}},
+  ], {barmode:'group', margin:{l:54,r:16,t:40,b:46},
+      xaxis:{automargin:true, tickfont:{size:10}},
+      yaxis:{automargin:true}, legend:{orientation:'h', x:0, y:1.14}});
+
+  const aliados = D.aliados || [];
+  plot('g_aliado', [
+    {x:aliados.map(a=>a.aliado), y:aliados.map(a=>a.total), type:'bar', name:'Mantenimientos',
+     marker:{color:COLORES.blue}},
+  ], {showlegend:false, xaxis:{automargin:true, tickangle:-25, tickfont:{size:9}},
+      yaxis:{automargin:true}});
+}
+
+/* ---------------- tabla por departamento ---------------- */
+function renderTablaDepto(){
+  const tbody = document.querySelector('#tabla_depto tbody');
+  tbody.innerHTML = D.geo.map(g => {
+    const regs = (g.regiones||[]).join(', ') || '—';
+    const hor = g.horario ? g.horario.replace(/Y DE 02:/gi,'·').substring(0,28) : '—';
+    return `<tr>
+      <td data-label="Departamento"><b>${g.depto}</b></td><td data-label="Región(es)">${regs}</td>
+      <td data-label="Total" class="num">${fmt.format(g.total)}</td><td data-label="Programadas" class="num">${fmt.format(g.programadas)}</td>
+      <td data-label="En proceso" class="num">${fmt.format(g.en_proceso||0)}</td><td data-label="Finalizadas" class="num">${fmt.format(g.finalizadas)}</td>
+      <td data-label="Sede cerrada" class="num">${fmt.format(g.sede_cerrada||0)}</td><td data-label="Intervenidas" class="num">${fmt.format(g.intervenidas)}</td>
+      <td data-label="% Avance" class="num"><b>${g.avance_pct.toFixed(1).replace('.',',')} %</b></td>
+      <td data-label="Horario">${hor}</td>
+    </tr>`;
+  }).join('');
+  const sinDep = D.rows.filter(r=>!norm(r.departamento)).length;
+  if (sinDep > 0) {
+    const fila = document.createElement('tr');
+    fila.innerHTML = `<td data-label="Info" colspan="2">Sedes sin departamento</td>
+      <td data-label="Total" class="num">${fmt.format(sinDep)}</td><td colspan="7"></td>`;
+    tbody.appendChild(fila);
+  }
+}
+
+/* ---------------- directorio de oficinas ---------------- */
+function listaOficinasVisible(){
+  const q = norm(document.getElementById('busca_oficina').value);
+  const est = document.getElementById('sel_estado_oficina').value;
+  let lista = D.rows.slice();
+  if (est) lista = lista.filter(r=>r.estado===est);
+  if (q) lista = lista.filter(r=> norm(r.sban).includes(q) || norm(r.oficina).includes(q)
+                              || norm(r.municipio).includes(q) || norm(r.departamento).includes(q));
+  lista.sort((a,b)=> (parseInt(a.sban)||0)-(parseInt(b.sban)||0));
+  return lista;
+}
+
+function renderOficinas(){
+  const lista = listaOficinasVisible();
+  const tbody = document.querySelector('#tabla_oficinas tbody');
+  tbody.innerHTML = lista.map(r=>`<tr>
+      <td data-label="SBAN" class="num"><b>${r.sban}</b></td><td data-label="Oficina">${r.oficina||'—'}</td><td data-label="Municipio">${r.municipio||'—'}</td>
+      <td data-label="Departamento">${r.departamento||'—'}</td><td data-label="Región">${r.region||'—'}</td>
+      <td data-label="Horario">${(r.horario||'—').substring(0,30)}</td>
+      <td data-label="Estado"><span style="display:inline-block;background:${EST_COL[r.estado]||'#64748B'};color:#fff;padding:4px 10px;border-radius:12px;font-size:11px;font-weight:600">${r.estado}</span></td>
+      <td data-label="Aliado">${r.aliado||'—'}</td>
+    </tr>`).join('');
+  document.getElementById('n_oficinas').textContent =
+    `${fmt.format(lista.length)} de ${fmt.format(D.rows.length)} oficinas`;
+}
+
+function exportarCSV(){
+  const lista = listaOficinasVisible();
+  const cab = ['SBAN','Nombre Oficina','Municipio','Departamento','Region','Horario','Estado','Aliado'];
+  const lim = s => (s||'').replace(/;/g,' ').replace(/\r?\n/g,' ');
+  const lineas = [cab.join(';')].concat(lista.map(r=>
+    [r.sban, lim(r.oficina), lim(r.municipio), lim(r.departamento), r.region||'',
+     lim(r.horario), r.estado, r.aliado||''].join(';')));
+  const blob = new Blob(['\uFEFF'+lineas.join('\n')], {type:'text/csv;charset=utf-8'});
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = 'directorio_oficinas.csv';
+  a.click();
+}
+
+/* ---------------- mapa ---------------- */
+function deptoPorRegion(g, region){
+  return !region || (g.regiones||[]).includes(region);
+}
+
+function renderMapa(){
+  const ind = document.getElementById('sel_ind').value;
+  const modo = document.getElementById('mapa_modo');
+  const geo = D.geo.filter(g => deptoPorRegion(g, F.region));
+
+  const texto = g => `${g.depto}<br>Total: ${g.total} · Intervenidas: ${g.intervenidas} · Avance: ${g.avance_pct}%${g.horario?'<br>Horario: '+g.horario:''}`;
+
+  if (GEOJSON) {
+    const porNom = {};
+    geo.forEach(g => porNom[norm(g.depto)] = g);
+    const feats = GEOJSON.features.filter(f => porNom[norm(f.properties[geoKey])]);
+    const locations = [], z = [], custom = [];
+    feats.forEach(f => {
+      const n = norm(f.properties[geoKey]);
+      const g = porNom[n];
+      locations.push(f.properties[geoKey]);
+      z.push(ind==='avance_pct' ? g.avance_pct : (g[ind]||0));
+      custom.push([g.depto, texto(g)]);
+    });
+    const colorEscala = ind==='avance_pct'
+      ? [[0,'#E2E8F0'],[0.25,'#93C5FD'],[0.6,'#3B82F6'],[1,'#16A34A']]
+      : [[0,'#E2E8F0'],[1,'#3B82F6']];
+    plot('mapa', [{
+      type:'choropleth', geojson:GEOJSON, locations, z, featureidkey:'properties.'+geoKey,
+      colorscale:colorEscala, zmin:0,
+      marker:{line:{color:'#fff', width:.6}},
+      hovertemplate:'%{customdata[1]}<extra></extra>', customdata:custom,
+      colorbar:{title:{text: ind==='avance_pct'?'% avance':'cantidad', side:'right'}}
+    }], {height: window.innerWidth < 900 ? 400 : 520,
+         margin:{l:10,r:10,t:10,b:10},
+         geo:{scope:'south america', fitbounds:'locations', showframe:false, bgcolor:'#F8FAFC',
+              landcolor:'#E2E8F0', countrycolor:'#CBD5E1', coastlinecolor:'#CBD5E1'}});
+    modo.textContent = 'Modo: choropleth (colombia.geojson)';
+  } else {
+    const lon = geo.map(g=>g.lon), lat = geo.map(g=>g.lat);
+    const colores = geo.map(g => {
+      if (g.finalizadas + (g.sede_cerrada||0) > 0) return COLORES.green;
+      if ((g.en_proceso||0) > 0) return COLORES.blue;
+      if ((g.reprogramadas||0) > 0) return COLORES.amber;
+      return COLORES.gray;
+    });
+    const tam = geo.map(g => Math.max(6, Math.sqrt(g.total)*4));
+    const custom = geo.map(g => [g.depto, texto(g)]);
+    plot('mapa', [{
+      type:'scattergeo', lon, lat, mode:'markers+text',
+      text:geo.map(g=>g.depto), textposition:'top center', textfont:{size:9, color:COLORES.ink},
+      customdata:custom, hovertemplate:'%{customdata[1]}<extra></extra>',
+      marker:{size:tam, color:colores, line:{color:'#fff', width:.8}, opacity:.85}
+    }], {height: window.innerWidth < 900 ? 400 : 520,
+         margin:{l:10,r:10,t:10,b:10},
+         geo:{scope:'south america', center:{lon:-73, lat:4},
+              lonaxis:{range:[-82,-66]}, lataxis:{range:[-5,13]},
+              showland:true, landcolor:'#F1F5F9', coastlinecolor:COLORES.border,
+              countrycolor:COLORES.border, showframe:false, bgcolor:'#F8FAFC'}});
+    modo.textContent = 'Modo: burbujas por departamento — agregue public/colombia.geojson para choropleth';
+  }
+}
+
+/* ---------------- init ---------------- */
+function llenarSelect(id, items, etiqueta, valor){
+  const sel = document.getElementById(id);
+  items.forEach(it => {
+    const o = document.createElement('option');
+    o.value = valor(it); o.textContent = etiqueta(it);
+    sel.appendChild(o);
+  });
+}
+
+async function init(){
+  try { DATOS = await (await fetch('dashboard.json')).json(); }
+  catch(e){ document.getElementById('badge').textContent = 'ERROR: no se pudo cargar dashboard.json'; return; }
+  try {
+    GEOJSON = await (await fetch('colombia.geojson')).json();
+    if (GEOJSON && GEOJSON.features && GEOJSON.features[0]) {
+      geoKey = Object.keys(GEOJSON.features[0].properties).find(k =>
+        /NOMBRE|DEPART|DPTO|NAME|nombre/i.test(k)) || Object.keys(GEOJSON.features[0].properties)[0];
+    }
+  } catch(e){ GEOJSON = null; }
+  if (typeof Plotly === 'undefined') {
+    document.getElementById('badge').textContent = 'ERROR: Plotly no cargó (revisa vendor/plotly.min.js o la conexión)';
+    return;
+  }
+
+  llenarSelect('f_mes', DATOS.plan_mensual, m=>`${String(m.mes).padStart(2,'0')}/${m.ano}`, m=>`${m.ano}-${m.mes}`);
+  llenarSelect('f_region', DATOS.regiones, r=>r.region, r=>r.region);
+  llenarSelect('f_aliado', DATOS.aliados, a=>a.aliado, a=>a.aliado);
+  llenarSelect('f_estado', DATOS.estados, e=>e.estado, e=>e.estado);
+  llenarSelect('sel_estado_oficina', DATOS.estados, e=>e.estado, e=>e.estado);
+
+  const defMes = `${DATOS.meta.ano}-${DATOS.meta.mes}`;
+  const selMes = document.getElementById('f_mes');
+  if ([...selMes.options].some(o=>o.value===defMes)) selMes.value = defMes;
+  F.mes = selMes.value;
+
+  const selRegion = document.getElementById('f_region');
+  const selAliado = document.getElementById('f_aliado');
+  const selEstado = document.getElementById('f_estado');
+  [selMes, selRegion, selAliado, selEstado].forEach(sel =>
+    sel.addEventListener('change', ()=>{ F.mes=selMes.value; F.region=selRegion.value;
+                                        F.aliado=selAliado.value; F.estado=selEstado.value; recomputar(); }));
+  document.getElementById('f_limpiar').addEventListener('click', ()=>{
+    F.mes=''; F.region=''; F.aliado=''; F.estado='';
+    selMes.value=''; selRegion.value=''; selAliado.value=''; selEstado.value='';
+    recomputar();
+  });
+  document.getElementById('sel_ind').addEventListener('change', renderMapa);
+  document.getElementById('busca_oficina').addEventListener('input', renderOficinas);
+  document.getElementById('sel_estado_oficina').addEventListener('change', renderOficinas);
+  document.getElementById('btn_export').addEventListener('click', exportarCSV);
+
+  recomputar();
+
+  // cross-filtering: clic en un departamento del mapa → busca en directorio
+  document.getElementById('mapa').on('plotly_click', e => {
+    const pt = e && e.points && e.points[0];
+    if (pt && pt.customdata) {
+      document.getElementById('busca_oficina').value = pt.customdata[0];
+      renderOficinas();
+    }
+  });
+  
+  // cross-filtering global desde gráficos
+  document.getElementById('g_region').on('plotly_click', e => {
+    if (e && e.points && e.points[0]) {
+      const val = e.points[0].x;
+      document.getElementById('f_region').value = val;
+      F.region = val; recomputar();
+    }
+  });
+  document.getElementById('g_aliado').on('plotly_click', e => {
+    if (e && e.points && e.points[0]) {
+      const val = e.points[0].x;
+      document.getElementById('f_aliado').value = val;
+      F.aliado = val; recomputar();
+    }
+  });
+  document.getElementById('g_estado').on('plotly_click', e => {
+    if (e && e.points && e.points[0]) {
+      const val = e.points[0].customdata; // estado original
+      if(val) { document.getElementById('f_estado').value = val; F.estado = val; recomputar(); }
+    }
+  });
+
+  document.getElementById('badge').textContent =
+    `Actualizado: ${fmtFecha(DATOS.meta.generado)} · Periodo ${String(DATOS.meta.mes).padStart(2,'0')}/${DATOS.meta.ano}`;
+  document.getElementById('footer').innerHTML =
+    `Fuente: <b>${DATOS.meta.fuente}</b> (${DATOS.meta.total_registros} registros) — generado automáticamente por GitHub Actions · ` +
+    (GEOJSON ? 'Mapa: choropleth con GeoJSON de departamentos' : 'Mapa: modo burbuja (agregue colombia.geojson para choropleth)');
+}
+
+window.addEventListener('load', init);
+</script>
+</body>
+</html>

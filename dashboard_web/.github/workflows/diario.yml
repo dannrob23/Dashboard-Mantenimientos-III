@@ -1,0 +1,37 @@
+name: Actualizar dashboard desde Excel
+
+on:
+  schedule:
+    # 06:00 hora de Colombia (UTC-5) -> 11:00 UTC. Cambie el cron si su zona difiere.
+    - cron: '0 11 * * *'
+  workflow_dispatch:        # permite ejecutar manualmente desde la pestana Actions
+  push:
+    paths:
+      - 'data/**'           # se dispara al subir el Excel actualizado
+      - 'pipeline.py'
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write       # necesario para volver a subir dashboard.json
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Instalar dependencias
+        run: pip install -r requirements.txt
+
+      - name: Generar dashboard.json desde el Excel
+        run: python pipeline.py
+
+      - name: Commit y push del dashboard actualizado
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add public/dashboard.json
+          git diff --cached --quiet || git commit -m "chore(datos): actualizar dashboard $(date +%F)"
+          git push

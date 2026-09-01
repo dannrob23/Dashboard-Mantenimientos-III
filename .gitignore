@@ -1,0 +1,10 @@
+# Python & Temp files
+__pycache__/
+*.pyc
+~$*.xlsx
+.DS_Store
+.vscode/
+.idea/
+
+# Local build artifacts
+dashboard_web/data/
