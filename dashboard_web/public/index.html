@@ -59,6 +59,7 @@ function cargarPlotlyCDN(){
   .segmented-bar { display: flex; height: 14px; border-radius: 999px; overflow: hidden; margin: 12px 0 16px; background: #F1F5F9; }
   .seg { width: 0%; transition: width 1s cubic-bezier(0.4, 0, 0.2, 1); }
   .seg-ejec { background: linear-gradient(90deg, #10B981, #059669); box-shadow: 0 0 8px rgba(16, 185, 129, 0.4); }
+  .seg-proc { background: linear-gradient(90deg, #3B82F6, #1D4ED8); box-shadow: 0 0 8px rgba(59, 130, 246, 0.4); }
   .seg-pc { background: #CBD5E1; }
   .seg-pend { background: linear-gradient(90deg, #F59E0B, #D97706); box-shadow: 0 0 8px rgba(245, 158, 11, 0.4); }
   .seg-otras { background: #E2E8F0; }
@@ -463,7 +464,9 @@ function renderKpis(){
   /* Embudo apilado: los tramos suman exactamente el 100% del total */
   const porCompletar = Math.max(0, k.por_completar || 0);
   const ejecConCierre = Math.max(0, k.ejecutadas - porCompletar);
-  const otras = Math.max(0, totalSedes - k.ejecutadas - k.pendientes);
+  const enProc = Math.max(0, k.en_proceso || 0);
+  const progSolo = Math.max(0, (k.programadas !== undefined ? k.programadas : k.pendientes - enProc));
+  const otras = Math.max(0, totalSedes - k.ejecutadas - enProc - progSolo);
   const w = n => totalSedes ? (n/totalSedes*100).toFixed(2) : 0;
 
   const isDanger = k.cuellos_botella > 0;
@@ -520,16 +523,16 @@ function renderKpis(){
         <div class="segmented-bar">
           <div class="seg seg-ejec" style="width:0%" data-width="${w(ejecConCierre)}%" title="Ejecutadas con cierre: ${fmt.format(ejecConCierre)}"></div>
           ${porCompletar > 0 ? `<div class="seg seg-pc" style="width:0%" data-width="${w(porCompletar)}%" title="Ejecutadas sin cierre: ${fmt.format(porCompletar)}"></div>` : ''}
-          <div class="seg seg-pend" style="width:0%" data-width="${w(k.pendientes)}%" title="Pendientes: ${fmt.format(k.pendientes)}"></div>
+          ${enProc > 0 ? `<div class="seg seg-proc" style="width:0%" data-width="${w(enProc)}%" title="En Sitio / En proceso: ${fmt.format(enProc)}"></div>` : ''}
+          <div class="seg seg-pend" style="width:0%" data-width="${w(progSolo)}%" title="Programadas pendientes: ${fmt.format(progSolo)}"></div>
           ${otras > 0 ? `<div class="seg seg-otras" style="width:0%" data-width="${w(otras)}%" title="Otras: ${fmt.format(otras)}"></div>` : ''}
         </div>
         <div class="seg-labels">
           <div><span style="color:var(--muted);"><i class="dot" style="background:var(--green)"></i>Ejecutadas</span><span class="num">${fmt.format(k.ejecutadas)}</span></div>
-          <div><span style="color:var(--muted);"><i class="dot" style="background:var(--amber)"></i>Pendientes</span><span class="num">${fmt.format(k.pendientes)}</span></div>
-          <div><span style="color:var(--muted);"><i class="dot" style="background:#CBD5E1"></i>Por completar</span><span class="num">${fmt.format(porCompletar)}</span></div>
-          ${otras > 0 ? `<div><span style="color:var(--muted);"><i class="dot" style="background:#E2E8F0"></i>Otras</span><span class="num">${fmt.format(otras)}</span></div>` : ''}
+          <div><span style="color:var(--muted);"><i class="dot" style="background:var(--blue)"></i>En Sitio (En proceso)</span><span class="num">${fmt.format(enProc)}</span></div>
+          <div><span style="color:var(--muted);"><i class="dot" style="background:var(--amber)"></i>Programadas</span><span class="num">${fmt.format(progSolo)}</span></div>
         </div>
-        ${porCompletar > 0 ? '<div class="bento-note">El tramo gris son sedes ejecutadas que aún no registran fecha de cierre.</div>' : ''}
+        <div class="bento-note">ℹ️ <b>Estado Operativo:</b> Hay ${fmt.format(enProc)} sedes con inicio en sitio registrado. El % de cumplimiento y cierre se activará al registrar la fecha fin de salida.</div>
       </div>
 
       <!-- Bloque 2: Tendencias del mes (sparklines SVG nativas agrupadas) -->
