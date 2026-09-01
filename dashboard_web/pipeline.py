@@ -20,9 +20,13 @@ import unicodedata
 from openpyxl import load_workbook
 
 AQUI = os.path.dirname(os.path.abspath(__file__))
-# Búsqueda por defecto de la bitácora
-ROTA_RAIZ = os.path.abspath(os.path.join(AQUI, "..", "Bitacora_Final_Dashboard_BAC.xlsx"))
-XLSX_DEFECTO = ROTA_RAIZ if os.path.exists(ROTA_RAIZ) else os.path.join(AQUI, "data", "Bitacora_Diaria.xlsx")
+# Búsqueda por defecto de la bitácora en orden de prioridad
+CANDIDATOS_XLSX = [
+    os.path.abspath(os.path.join(AQUI, "..", "CONTROL DE EQUIPOS MANTENIMIENTO.xlsx")),
+    os.path.abspath(os.path.join(AQUI, "..", "Bitacora_Final_Dashboard_BAC.xlsx")),
+    os.path.join(AQUI, "data", "Bitacora_Diaria.xlsx")
+]
+XLSX_DEFECTO = next((path for path in CANDIDATOS_XLSX if os.path.exists(path)), CANDIDATOS_XLSX[-1])
 SALIDA = os.path.join(AQUI, "public", "dashboard.json")
 
 REGIONES = ["ANTIOQUIA", "ORIENTE", "COSTA", "SUR", "OCCIDENTE", "SANTANDERES",
@@ -60,22 +64,44 @@ def normalizar(nombre):
 
 
 def a_fecha(v):
+    if not v:
+        return None
     if isinstance(v, datetime.datetime):
         return v.date()
     if isinstance(v, datetime.date):
         return v
+    s = str(v).strip()
+    s = re.sub(r"\s+.*$", "", s) # quitar hora si existe
+    m = re.match(r"^(\d{4})[-/](\d{1,2})[-/](\d{1,2})", s)
+    if m:
+        try:
+            return datetime.date(int(m.group(1)), int(m.group(2)), int(m.group(3)))
+        except ValueError:
+            pass
+    m = re.match(r"^(\d{1,2})[/.-](\d{1,2})[/.-]?(\d{4})$", s)
+    if m:
+        try:
+            return datetime.date(int(m.group(3)), int(m.group(2)), int(m.group(1)))
+        except ValueError:
+            pass
+    m = re.match(r"^(\d{1,2})[/.-](\d{2})(\d{4})$", s)
+    if m:
+        try:
+            return datetime.date(int(m.group(3)), int(m.group(2)), int(m.group(1)))
+        except ValueError:
+            pass
     return None
 
 
 def leer_maestro(xlsx):
-    """Cronograma_Maestro o Cronograma por SBAN (identidad + horario + aliado)."""
+    """Cronograma_Maestro, Cronograma u Hoja1 por SBAN."""
     wb = load_workbook(xlsx, data_only=True, read_only=True)
     sheet_name = None
-    if "Cronograma_Maestro" in wb.sheetnames:
-        sheet_name = "Cronograma_Maestro"
-    elif "Cronograma" in wb.sheetnames:
-        sheet_name = "Cronograma"
-    else:
+    for cand in ["Cronograma_Maestro", "Cronograma", "Hoja1"]:
+        if cand in wb.sheetnames:
+            sheet_name = cand
+            break
+    if not sheet_name:
         wb.close()
         return {}
 
@@ -97,7 +123,7 @@ def leer_maestro(xlsx):
 
     idx_sban = find_idx("SBAN")
     idx_oficina = find_idx("Nombre Oficina", "Nombre_Oficina", "Oficina")
-    idx_muni = find_idx("Municipio")
+    idx_muni = find_idx("Municipio", "MJNICIPIO")
     idx_depto = find_idx("Departamento")
     idx_region = find_idx("Jefaturas Operaciones Regional", "Regional", "Region")
     idx_horario = find_idx("Horario Atencion", "Horario")
@@ -125,10 +151,16 @@ def leer_maestro(xlsx):
 
 def leer_registros(xlsx, maestro):
     wb = load_workbook(xlsx, data_only=True, read_only=True)
-    if "Bitacora_Diaria" not in wb.sheetnames:
+    sheet_name = None
+    for cand in ["Bitacora_Diaria", "Hoja3"]:
+        if cand in wb.sheetnames:
+            sheet_name = cand
+            break
+    if not sheet_name:
         wb.close()
         return []
-    ws = wb["Bitacora_Diaria"]
+
+    ws = wb[sheet_name]
     rows = iter(ws.iter_rows(values_only=True))
     try:
         headers = [normalizar(c) if c else "" for c in next(rows)]
@@ -146,18 +178,17 @@ def leer_registros(xlsx, maestro):
 
     idx_sban = find_idx("SBAN")
     idx_oficina = find_idx("Nombre_Oficina", "Nombre Oficina", "Oficina")
-    idx_muni = find_idx("Municipio")
+    idx_muni = find_idx("Municipio", "MJNICIPIO")
     idx_depto = find_idx("Departamento")
-    idx_region = find_idx("Region", "Regional")
-    idx_f_prog_ini = find_idx("Fecha_Programada_Inicio", "Fecha Programada Inicio", "Fecha Inicio")
-    idx_f_prog_fin = find_idx("Fecha_Programada_Fin", "Fecha Programada Fin", "Fecha Fin")
-    idx_f_ini_real = find_idx("Fecha_Inicio_Real", "Fecha Inicio Real")
-    idx_f_salida = find_idx("Fecha_Salida_Real", "Fecha Salida Real")
+    idx_region = find_idx("Jefaturas Operaciones Regional", "Region", "Regional")
+    idx_f_prog_ini = find_idx("Fecha_Programada_Inicio", "Fecha Programada Inicio", "FECHA INICIO CRONOGRAMANA", "Fecha Inicio")
+    idx_f_prog_fin = find_idx("Fecha_Programada_Fin", "Fecha Programada Fin", "FECHA FIN CRONOGRMA", "Fecha Fin")
+    idx_f_ini_real = find_idx("Fecha_Inicio_Real", "Fecha Inicio Real", "FECHA DE INICIO")
+    idx_f_salida = find_idx("Fecha_Salida_Real", "Fecha Salida Real", "Fecha Cierre Operativo", "FECHA FIN")
     idx_dias = find_idx("Dias_Desviacion", "Dias Desviacion")
-    idx_f_cierre = find_idx("Fecha_Cierre_Operativo", "Fecha Cierre Operativo")
-    idx_estado = find_idx("Estado_Mantenimiento", "Estado Mantenimiento", "Estado")
-    idx_causal = find_idx("Causal_Desviacion", "Causal Desviacion", "Causal")
-    idx_acta = find_idx("Estatus_Acta", "Estatus Acta")
+    idx_estado_colsof = find_idx("ESTADO COLSOF", "Estado_Mantenimiento", "Estado Mantenimiento", "Estado")
+    idx_estado_bac = find_idx("ESTADO BAC", "REVISION BAC", "Estatus_Acta", "Estatus Acta")
+    idx_causal = find_idx("Causal_Desviacion", "Causal Desviacion", "Causal", "OBSERVACION", "OBSERVACIONES")
     idx_cant = find_idx("Cantidad_Equipos", "Cantidad Equipos")
 
     registros = []
@@ -165,16 +196,37 @@ def leer_registros(xlsx, maestro):
         if not any(fila):
             continue
         get_val = lambda idx: fila[idx] if (idx is not None and idx < len(fila)) else None
-        estado = str(get_val(idx_estado) or "").strip()
-        if not estado:
-            continue
+        
         sban_raw = get_val(idx_sban)
         sban = str(sban_raw).strip() if sban_raw is not None else ""
+        if not sban:
+            continue
         m = maestro.get(sban, {})
+
         h = a_fecha(get_val(idx_f_prog_ini))
         i = a_fecha(get_val(idx_f_prog_fin))
         j = a_fecha(get_val(idx_f_ini_real))
-        k = a_fecha(get_val(idx_f_salida) or get_val(idx_f_cierre))
+        k = a_fecha(get_val(idx_f_salida))
+
+        st_colsof_raw = str(get_val(idx_estado_colsof) or "").strip()
+        st_bac_raw = str(get_val(idx_estado_bac) or "").strip()
+
+        # Determinar estado unificado
+        if st_bac_raw in ("OK", "REVISADO", "Sede_Cerrada", "Firmada"):
+            estado = "Sede_Cerrada"
+        elif k or st_colsof_raw in ("FINALIZADA", "Finalizada", "CONCLUIDO"):
+            estado = "Finalizada"
+        elif j or st_colsof_raw in ("EN SITIO", "En Proceso", "EN EJECUCION"):
+            estado = "En Proceso"
+        elif st_colsof_raw in ("REPROGRAMADA", "Reprogramada"):
+            estado = "Reprogramada"
+        elif st_colsof_raw in ("CANCELADA", "Cancelada"):
+            estado = "Cancelada"
+        elif st_colsof_raw:
+            estado = st_colsof_raw
+        else:
+            estado = "Programada"
+
         mf = None
         comp = mf if mf else i
         n = "SÍ" if (j and h and j <= h) else ("NO" if (j and h) else None)
@@ -182,12 +234,14 @@ def leer_registros(xlsx, maestro):
         p = None
         if n is not None and o is not None:
             p = "SÍ" if (n == "SÍ" and o == "SÍ") else "NO"
+        elif n == "NO" or o == "NO":
+            p = "NO"
 
         dias_val = get_val(idx_dias)
         if isinstance(dias_val, (int, float)):
             q = int(dias_val)
         else:
-            q = max(0, (k - comp).days) if (k and comp) else None
+            q = max(0, (k - comp).days) if (k and comp) else (max(0, (j - h).days) if (j and h and j > h) else None)
 
         depto_raw = str(get_val(idx_depto) or "").strip()
         departamento = depto_raw if depto_raw else (m.get("departamento") or "")
@@ -213,7 +267,7 @@ def leer_registros(xlsx, maestro):
             "f_nueva": mf, "cumpli_ingreso": n, "cumpli_salida": o,
             "cumpli": p, "dias": q,
             "causal": str(get_val(idx_causal) or ""),
-            "estatus_acta": str(get_val(idx_acta) or ""),
+            "estatus_acta": st_bac_raw,
             "cant_equipos": cant_equipos,
         })
     wb.close()

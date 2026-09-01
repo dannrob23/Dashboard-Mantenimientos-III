@@ -1,0 +1,43 @@
+# dependencies
+node_modules/
+.pnp
+.pnp.js
+
+# next.js
+.next/
+out/
+build/
+
+# production
+dist/
+
+# misc
+.DS_Store
+*.pem
+
+# debug
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# local env files
+.env*.local
+.env
+
+# vercel
+.vercel
+
+# typescript
+*.tsbuildinfo
+next-env.d.ts
+
+# Excel files (solo mantener el template)
+/data/raw/*.xlsx
+!data/raw/.gitkeep
+
+# Processed data (se regenera en /data/processed/, pero mantener el de public)
+/data/processed/*.json
+!data/processed/.gitkeep
+
+# Mantener el JSON de muestra en public para que funcione el demo
+# !public/data/*.json
