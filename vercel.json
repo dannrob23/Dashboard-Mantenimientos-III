@@ -1,16 +1,10 @@
 {
-  "version": 2,
-  "public": true,
-  "builds": [
+  "outputDirectory": "dashboard_web/public",
+  "cleanUrls": true,
+  "rewrites": [
     {
-      "src": "dashboard_web/public/**",
-      "use": "@vercel/static"
-    }
-  ],
-  "routes": [
-    {
-      "src": "/(.*)",
-      "dest": "/dashboard_web/public/$1"
+      "source": "/(.*)",
+      "destination": "/index.html"
     }
   ]
 }
