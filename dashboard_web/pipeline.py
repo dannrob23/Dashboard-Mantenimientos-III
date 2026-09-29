@@ -346,7 +346,14 @@ def main():
                              "programadas": prog, "acumulado": acum, "plan_acum": plan_acum})
 
     regiones = []
-    for reg in REGIONES:
+    # Se incluyen las jefaturas presentes en los datos (por ejemplo
+    # "JEFATURA BARRANQUILLA") además de las regiones base, para que el filtro
+    # y el grafico del dashboard puedan mostrarlas.
+    nombres_regiones = list(REGIONES) + [
+        reg for reg in dict.fromkeys(r["region"] for r in regs)
+        if reg and reg not in REGIONES
+    ]
+    for reg in nombres_regiones:
         rs = [r for r in regs if r["region"] == reg]
         ej = sum(1 for r in rs if r["estado"] in ("Finalizada", "Sede_Cerrada"))
         cum = sum(1 for r in rs if r["cumpli"] == "SÍ")

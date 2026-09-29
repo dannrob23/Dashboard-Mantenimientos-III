@@ -5,7 +5,7 @@
   "ano": 2026,
   "total_registros": 824,
   "sin_departamento": 0,
-  "generado": "2026-09-01T10:51:40"
+  "generado": "2026-09-29T15:17:50"
  },
  "kpis": {
   "total": 824,
@@ -26,8 +26,8 @@
   "equipos_impactados": 0,
   "eficiencia_calidad": 0,
   "actas_pendientes": 0,
-  "en_proceso_largo": 0,
-  "cuellos_botella": 0,
+  "en_proceso_largo": 7,
+  "cuellos_botella": 7,
   "proyeccion_mes": 0
  },
  "estados": [
@@ -64,7 +64,7 @@
  "regiones": [
   {
    "region": "ANTIOQUIA",
-   "total": 121,
+   "total": 119,
    "ejecutadas": 0,
    "evaluables": 0,
    "cumplen": 0,
@@ -75,7 +75,7 @@
   },
   {
    "region": "ORIENTE",
-   "total": 98,
+   "total": 97,
    "ejecutadas": 0,
    "evaluables": 0,
    "cumplen": 0,
@@ -86,7 +86,7 @@
   },
   {
    "region": "COSTA",
-   "total": 113,
+   "total": 110,
    "ejecutadas": 0,
    "evaluables": 0,
    "cumplen": 0,
@@ -97,7 +97,7 @@
   },
   {
    "region": "SUR",
-   "total": 111,
+   "total": 109,
    "ejecutadas": 0,
    "evaluables": 0,
    "cumplen": 0,
@@ -108,7 +108,7 @@
   },
   {
    "region": "OCCIDENTE",
-   "total": 99,
+   "total": 96,
    "ejecutadas": 0,
    "evaluables": 0,
    "cumplen": 0,
@@ -119,7 +119,7 @@
   },
   {
    "region": "SANTANDERES",
-   "total": 84,
+   "total": 82,
    "ejecutadas": 0,
    "evaluables": 0,
    "cumplen": 0,
@@ -130,7 +130,7 @@
   },
   {
    "region": "CAFETERA",
-   "total": 61,
+   "total": 60,
    "ejecutadas": 0,
    "evaluables": 0,
    "cumplen": 0,
@@ -141,7 +141,7 @@
   },
   {
    "region": "BOGOTA",
-   "total": 133,
+   "total": 131,
    "ejecutadas": 0,
    "evaluables": 0,
    "cumplen": 0,
@@ -163,6 +163,182 @@
   },
   {
    "region": "COA",
+   "total": 1,
+   "ejecutadas": 0,
+   "evaluables": 0,
+   "cumplen": 0,
+   "desvian": 0,
+   "cumplimiento": 0,
+   "desviacion": 0,
+   "desv_prom": 0.0
+  },
+  {
+   "region": "JEFATURA BARRANQUILLA",
+   "total": 1,
+   "ejecutadas": 0,
+   "evaluables": 0,
+   "cumplen": 0,
+   "desvian": 0,
+   "cumplimiento": 0,
+   "desviacion": 0,
+   "desv_prom": 0.0
+  },
+  {
+   "region": "JEFATURA BOGOTA",
+   "total": 1,
+   "ejecutadas": 0,
+   "evaluables": 0,
+   "cumplen": 0,
+   "desvian": 0,
+   "cumplimiento": 0,
+   "desviacion": 0,
+   "desv_prom": 0.0
+  },
+  {
+   "region": "JEFATURA VILLAVICENCIO",
+   "total": 1,
+   "ejecutadas": 0,
+   "evaluables": 0,
+   "cumplen": 0,
+   "desvian": 0,
+   "cumplimiento": 0,
+   "desviacion": 0,
+   "desv_prom": 0.0
+  },
+  {
+   "region": "JEFATURA MEDELLIN",
+   "total": 1,
+   "ejecutadas": 0,
+   "evaluables": 0,
+   "cumplen": 0,
+   "desvian": 0,
+   "cumplimiento": 0,
+   "desviacion": 0,
+   "desv_prom": 0.0
+  },
+  {
+   "region": "JEFATURA MONTERIA",
+   "total": 1,
+   "ejecutadas": 0,
+   "evaluables": 0,
+   "cumplen": 0,
+   "desvian": 0,
+   "cumplimiento": 0,
+   "desviacion": 0,
+   "desv_prom": 0.0
+  },
+  {
+   "region": "JEFATURA CALI",
+   "total": 1,
+   "ejecutadas": 0,
+   "evaluables": 0,
+   "cumplen": 0,
+   "desvian": 0,
+   "cumplimiento": 0,
+   "desviacion": 0,
+   "desv_prom": 0.0
+  },
+  {
+   "region": "JEFATURA PASTO",
+   "total": 1,
+   "ejecutadas": 0,
+   "evaluables": 0,
+   "cumplen": 0,
+   "desvian": 0,
+   "cumplimiento": 0,
+   "desviacion": 0,
+   "desv_prom": 0.0
+  },
+  {
+   "region": "JEFATURA POPAYAN",
+   "total": 1,
+   "ejecutadas": 0,
+   "evaluables": 0,
+   "cumplen": 0,
+   "desvian": 0,
+   "cumplimiento": 0,
+   "desviacion": 0,
+   "desv_prom": 0.0
+  },
+  {
+   "region": "JEFATUTA SINCELEJO",
+   "total": 1,
+   "ejecutadas": 0,
+   "evaluables": 0,
+   "cumplen": 0,
+   "desvian": 0,
+   "cumplimiento": 0,
+   "desviacion": 0,
+   "desv_prom": 0.0
+  },
+  {
+   "region": "JEFATURA VALLEDUPAR",
+   "total": 1,
+   "ejecutadas": 0,
+   "evaluables": 0,
+   "cumplen": 0,
+   "desvian": 0,
+   "cumplimiento": 0,
+   "desviacion": 0,
+   "desv_prom": 0.0
+  },
+  {
+   "region": "JEFATURA MANIZALES",
+   "total": 1,
+   "ejecutadas": 0,
+   "evaluables": 0,
+   "cumplen": 0,
+   "desvian": 0,
+   "cumplimiento": 0,
+   "desviacion": 0,
+   "desv_prom": 0.0
+  },
+  {
+   "region": "JEFATURA TUNJA",
+   "total": 1,
+   "ejecutadas": 0,
+   "evaluables": 0,
+   "cumplen": 0,
+   "desvian": 0,
+   "cumplimiento": 0,
+   "desviacion": 0,
+   "desv_prom": 0.0
+  },
+  {
+   "region": "JEFATURA BUCARAMANGA",
+   "total": 1,
+   "ejecutadas": 0,
+   "evaluables": 0,
+   "cumplen": 0,
+   "desvian": 0,
+   "cumplimiento": 0,
+   "desviacion": 0,
+   "desv_prom": 0.0
+  },
+  {
+   "region": "JEFATURA CUCUTA",
+   "total": 1,
+   "ejecutadas": 0,
+   "evaluables": 0,
+   "cumplen": 0,
+   "desvian": 0,
+   "cumplimiento": 0,
+   "desviacion": 0,
+   "desv_prom": 0.0
+  },
+  {
+   "region": "JEFATURA NEIVA",
+   "total": 1,
+   "ejecutadas": 0,
+   "evaluables": 0,
+   "cumplen": 0,
+   "desvian": 0,
+   "cumplimiento": 0,
+   "desviacion": 0,
+   "desv_prom": 0.0
+  },
+  {
+   "region": "JEFATURA IBAGUE",
    "total": 1,
    "ejecutadas": 0,
    "evaluables": 0,
@@ -424,7 +600,8 @@
    "regiones": [
     "ANTIOQUIA",
     "COSTA",
-    "SANTANDERES"
+    "SANTANDERES",
+    "JEFATURA MEDELLIN"
    ],
    "lat": 6.9,
    "lon": -75.5,
@@ -449,7 +626,8 @@
     "CAFETERA",
     "ORIENTE",
     "DIRECCION GENERAL",
-    "COA"
+    "COA",
+    "JEFATURA BOGOTA"
    ],
    "lat": 4.8,
    "lon": -74.2,
@@ -471,7 +649,8 @@
    "reprogramadas": 0,
    "regiones": [
     "ORIENTE",
-    "BOGOTA"
+    "BOGOTA",
+    "JEFATURA TUNJA"
    ],
    "lat": 5.7,
    "lon": -73.0,
@@ -493,7 +672,8 @@
    "reprogramadas": 0,
    "regiones": [
     "SANTANDERES",
-    "ORIENTE"
+    "ORIENTE",
+    "JEFATURA BUCARAMANGA"
    ],
    "lat": 7.1,
    "lon": -73.2,
@@ -515,7 +695,8 @@
    "reprogramadas": 0,
    "regiones": [
     "SUR",
-    "CAFETERA"
+    "CAFETERA",
+    "JEFATURA IBAGUE"
    ],
    "lat": 4.1,
    "lon": -75.1,
@@ -536,7 +717,8 @@
    "sede_cerrada": 0,
    "reprogramadas": 0,
    "regiones": [
-    "SUR"
+    "SUR",
+    "JEFATURA NEIVA"
    ],
    "lat": 2.6,
    "lon": -75.3,
@@ -558,7 +740,8 @@
    "sede_cerrada": 0,
    "reprogramadas": 0,
    "regiones": [
-    "OCCIDENTE"
+    "OCCIDENTE",
+    "JEFATURA PASTO"
    ],
    "lat": 1.5,
    "lon": -77.3,
@@ -580,7 +763,8 @@
    "reprogramadas": 0,
    "regiones": [
     "OCCIDENTE",
-    "SUR"
+    "SUR",
+    "JEFATURA POPAYAN"
    ],
    "lat": 2.4,
    "lon": -76.5,
@@ -602,7 +786,8 @@
    "reprogramadas": 0,
    "regiones": [
     "CAFETERA",
-    "OCCIDENTE"
+    "OCCIDENTE",
+    "JEFATURA CALI"
    ],
    "lat": 3.9,
    "lon": -76.5,
@@ -623,7 +808,8 @@
    "sede_cerrada": 0,
    "reprogramadas": 0,
    "regiones": [
-    "SANTANDERES"
+    "SANTANDERES",
+    "JEFATURA CUCUTA"
    ],
    "lat": 7.9,
    "lon": -72.5,
@@ -645,7 +831,8 @@
    "reprogramadas": 0,
    "regiones": [
     "ANTIOQUIA",
-    "COSTA"
+    "COSTA",
+    "JEFATURA MONTERIA"
    ],
    "lat": 8.5,
    "lon": -75.8,
@@ -666,7 +853,8 @@
    "sede_cerrada": 0,
    "reprogramadas": 0,
    "regiones": [
-    "BOGOTA"
+    "BOGOTA",
+    "JEFATURA VILLAVICENCIO"
    ],
    "lat": 3.6,
    "lon": -73.0,
@@ -687,7 +875,8 @@
    "sede_cerrada": 0,
    "reprogramadas": 0,
    "regiones": [
-    "CAFETERA"
+    "CAFETERA",
+    "JEFATURA MANIZALES"
    ],
    "lat": 5.3,
    "lon": -75.4,
@@ -709,7 +898,8 @@
    "reprogramadas": 0,
    "regiones": [
     "SANTANDERES",
-    "COSTA"
+    "COSTA",
+    "JEFATURA VALLEDUPAR"
    ],
    "lat": 9.3,
    "lon": -73.4,
@@ -730,7 +920,8 @@
    "sede_cerrada": 0,
    "reprogramadas": 0,
    "regiones": [
-    "COSTA"
+    "COSTA",
+    "JEFATUTA SINCELEJO"
    ],
    "lat": 9.3,
    "lon": -75.3,
@@ -772,7 +963,8 @@
    "sede_cerrada": 0,
    "reprogramadas": 0,
    "regiones": [
-    "COSTA"
+    "COSTA",
+    "JEFATURA BARRANQUILLA"
    ],
    "lat": 10.7,
    "lon": -74.8,
@@ -1038,7 +1230,7 @@
    ],
    "lat": 2.2,
    "lon": -72.0,
-   "horario": "8:00 A.M.  A 3:00 P.M.",
+   "horario": "8:00 AM - 11:30 AM Y DE 02:00 PM - 04:30 PM",
    "aliados": [
     "GESTIONATECH"
    ],
@@ -14848,7 +15040,7 @@
    "oficina": "Jefatura de Operaciones Barranquilla",
    "municipio": "Barranquilla",
    "departamento": "Atlántico",
-   "region": "COSTA",
+   "region": "JEFATURA BARRANQUILLA",
    "aliado": "REGIONAL",
    "horario": "",
    "estado": "Programada",
@@ -14865,7 +15057,7 @@
    "oficina": "Jefatura de Operaciones Bogotá COB",
    "municipio": "Bogota",
    "departamento": "Cundinamarca",
-   "region": "BOGOTA",
+   "region": "JEFATURA BOGOTA",
    "aliado": "REGIONAL",
    "horario": "",
    "estado": "Programada",
@@ -14882,7 +15074,7 @@
    "oficina": "Jefatura de Operaciones Villavicencio",
    "municipio": "Villavicencio",
    "departamento": "Meta",
-   "region": "BOGOTA",
+   "region": "JEFATURA VILLAVICENCIO",
    "aliado": "REGIONAL",
    "horario": "",
    "estado": "Programada",
@@ -14899,7 +15091,7 @@
    "oficina": "Jefatura de Operaciones Medellin COB",
    "municipio": "Medellín",
    "departamento": "Antioquia",
-   "region": "ANTIOQUIA",
+   "region": "JEFATURA MEDELLIN",
    "aliado": "REGIONAL",
    "horario": "",
    "estado": "Programada",
@@ -14916,7 +15108,7 @@
    "oficina": "Jefatura de Operaciones Monteria",
    "municipio": "Montería",
    "departamento": "Córdoba",
-   "region": "ANTIOQUIA",
+   "region": "JEFATURA MONTERIA",
    "aliado": "REGIONAL",
    "horario": "",
    "estado": "Programada",
@@ -14933,7 +15125,7 @@
    "oficina": "Jefatura de Operaciones Cali COB",
    "municipio": "Cali",
    "departamento": "Valle del Cauca",
-   "region": "OCCIDENTE",
+   "region": "JEFATURA CALI",
    "aliado": "REGIONAL",
    "horario": "",
    "estado": "Programada",
@@ -14950,7 +15142,7 @@
    "oficina": "Jefatura de Operaciones Pasto",
    "municipio": "Pasto",
    "departamento": "Nariño",
-   "region": "OCCIDENTE",
+   "region": "JEFATURA PASTO",
    "aliado": "REGIONAL",
    "horario": "",
    "estado": "Programada",
@@ -14967,7 +15159,7 @@
    "oficina": "Jefatura de Operaciones POPAYAN",
    "municipio": "Popayán",
    "departamento": "Cauca",
-   "region": "OCCIDENTE",
+   "region": "JEFATURA POPAYAN",
    "aliado": "REGIONAL",
    "horario": "",
    "estado": "Programada",
@@ -14984,7 +15176,7 @@
    "oficina": "Jefatura de Operaciones SINCELEJO",
    "municipio": "Sincelejo",
    "departamento": "Sucre",
-   "region": "COSTA",
+   "region": "JEFATUTA SINCELEJO",
    "aliado": "REGIONAL",
    "horario": "",
    "estado": "Programada",
@@ -15001,7 +15193,7 @@
    "oficina": "Jefatura de Operaciones Valledupar",
    "municipio": "Valledupar",
    "departamento": "Cesar",
-   "region": "COSTA",
+   "region": "JEFATURA VALLEDUPAR",
    "aliado": "REGIONAL",
    "horario": "",
    "estado": "Programada",
@@ -15018,7 +15210,7 @@
    "oficina": "Jefatura de Operaciones Manizales COB",
    "municipio": "Manizales",
    "departamento": "Caldas",
-   "region": "CAFETERA",
+   "region": "JEFATURA MANIZALES",
    "aliado": "REGIONAL",
    "horario": "",
    "estado": "Programada",
@@ -15035,7 +15227,7 @@
    "oficina": "Jefatura de Operaciones Tunja COB",
    "municipio": "Tunja",
    "departamento": "Boyacá",
-   "region": "ORIENTE",
+   "region": "JEFATURA TUNJA",
    "aliado": "REGIONAL",
    "horario": "",
    "estado": "Programada",
@@ -15052,7 +15244,7 @@
    "oficina": "Jefatura de Operaciones Bucaramanga COB",
    "municipio": "Bucaramanga",
    "departamento": "Santander",
-   "region": "SANTANDERES",
+   "region": "JEFATURA BUCARAMANGA",
    "aliado": "REGIONAL",
    "horario": "",
    "estado": "Programada",
@@ -15069,7 +15261,7 @@
    "oficina": "Jefatura de Operaciones Cúcuta COB",
    "municipio": "Cúcuta",
    "departamento": "Norte de Santander",
-   "region": "SANTANDERES",
+   "region": "JEFATURA CUCUTA",
    "aliado": "REGIONAL",
    "horario": "",
    "estado": "Programada",
@@ -15086,7 +15278,7 @@
    "oficina": "Jefatura de Operaciones Neiva COB",
    "municipio": "Neiva",
    "departamento": "Huila",
-   "region": "SUR",
+   "region": "JEFATURA NEIVA",
    "aliado": "REGIONAL",
    "horario": "",
    "estado": "Programada",
@@ -15103,7 +15295,7 @@
    "oficina": "Jefatura de Operaciones IBAGUE",
    "municipio": "Ibagué",
    "departamento": "Tolima",
-   "region": "SUR",
+   "region": "JEFATURA IBAGUE",
    "aliado": "REGIONAL",
    "horario": "",
    "estado": "Programada",
